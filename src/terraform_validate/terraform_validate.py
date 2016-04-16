@@ -75,6 +75,17 @@ class Validator:
     def assert_nested_resource_property_value_not_equals(self, resource_name, nested_resource_name, property, property_value, bool=True):
         self.assert_nested_resource_property_value_equals(resource_name, nested_resource_name, property,property_value, False)
 
+    def assert_resource_has_properties(self,resource_name,required_properties):
+        errors = []
+        resources = self.get_terraform_resources(resource_name, self.terraform_config['resource'])
+        for resource in resources:
+            property_names = resources[resource].keys()
+            for required_property_name in required_properties:
+                if not required_property_name in property_names:
+                    errors += ["[{0}.{1}] should have property: '{2}'".format(resource_name,resource,required_property_name)]
+        if len(errors) > 0:
+            raise AssertionError("\n".join(errors))
+
     def assert_nested_resource_has_properties(self,resource_name,nested_resource_name,required_properties):
         errors = []
         resources = self.terraform_config['resource'][resource_name]
