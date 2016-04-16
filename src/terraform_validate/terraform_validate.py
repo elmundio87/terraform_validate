@@ -45,19 +45,20 @@ class Validator:
 
         return values[name]
 
-
-
-    def assert_resource_property_value_equals(self,resource_name,property,property_value):
+    def assert_resource_property_value_equals(self,resource_name,property,property_value,bool=True):
         errors = []
         resources = self.get_terraform_resources(resource_name,self.terraform_config['resource'])
         for resource in resources:
             calculated_property_value = self.get_terraform_property_value(property,resources[resource])
-            if not str(calculated_property_value) == str(property_value):
+            if not (str(calculated_property_value) == str(property_value)) is bool:
                 errors += ["[{0}.{1}.{2}] should be '{3}'. Is: '{4}'".format(resource_name,resource, property,property_value,calculated_property_value)]
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))
 
-    def assert_nested_resource_property_value_equals(self,resource_name,nested_resource_name,property,property_value):
+    def assert_resource_property_value_not_equals(self, resource_name, property, property_value):
+        self.assert_resource_property_value_equals(resource_name,property,property_value,False)
+
+    def assert_nested_resource_property_value_equals(self,resource_name,nested_resource_name,property,property_value,bool=True):
         errors = []
         resources = self.terraform_config['resource'][resource_name]
         for resource in resources:
@@ -66,10 +67,13 @@ class Validator:
                 nested_resources = [nested_resources]
             for nested_resource in nested_resources:
                 calculated_property_value = self.get_terraform_property_value(property,nested_resource)
-                if not str(calculated_property_value) == str(property_value):
+                if not (str(calculated_property_value) == str(property_value)) is bool:
                     errors += ["[{0}.{1}.{2}.{3}] should be '{4}'. Is: '{5}'".format(resource_name,resource,nested_resource_name,property,property_value,calculated_property_value)]
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))
+
+    def assert_nested_resource_property_value_not_equals(self, resource_name, nested_resource_name, property, property_value, bool=True):
+        self.assert_nested_resource_property_value_equals(resource_name, nested_resource_name, property,property_value, False)
 
     def assert_nested_resource_has_properties(self,resource_name,nested_resource_name,required_properties):
         errors = []
