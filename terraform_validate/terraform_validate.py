@@ -2,6 +2,9 @@ import hcl
 import os
 import re
 
+class TerraformVariableException(Exception):
+    pass
+
 class Validator:
 
     def __init__(self,path):
@@ -37,12 +40,17 @@ class Validator:
         m = p.match(s)
         return m.group(1)
 
+    def get_terraform_variable_value(self,variable):
+        if ('variable' not in self.terraform_config.keys()) or (variable not in self.terraform_config['variable'].keys()):
+            raise TerraformVariableException("There is no Terraform variable '{0}'".format(variable))
+        return self.terraform_config['variable'][variable]['default']
+
     def get_terraform_property_value(self, name,values):
         if name not in values:
             return None
         for value in values:
             if self.is_terraform_variable(values[value]):
-                values[value] = self.terraform_config['variable'][self.get_terraform_variable_name(values[value])]['default']
+                values[value] = self.get_terraform_variable_value(self.get_terraform_variable_name(values[value]))
 
         return values[name]
 
