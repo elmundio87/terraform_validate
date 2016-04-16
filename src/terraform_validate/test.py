@@ -18,6 +18,11 @@ class TestEncryptionAtRest(unittest.TestCase):
         validator.assert_nested_resource_property_value_equals('aws_instance','nested_resource','value',1)
         validator.assert_nested_resource_property_value_not_equals('aws_instance', 'nested_resource', 'value', 0)
 
+    def test_nested_resource_required_properties(self):
+        required_properties = ['value','value2']
+        validator = t.Validator(os.path.join(self.path, "fixtures/nested_resource"))
+        validator.assert_nested_resource_has_properties('aws_instance','nested_resource',required_properties)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestEncryptionAtRest)
     unittest.TextTestRunner(verbosity=0).run(suite)
