@@ -24,12 +24,13 @@ class Validator:
             return []
         return resources[name]
 
-    def is_terraform_variable(self, variable):
-        p = re.compile('\${var.(.*)}')
+    def matches_regex_pattern(self,variable, regex):
+        p = re.compile(regex)
         m = p.match(str(variable))
-        if m is None:
-            return False
-        return True
+        return not (m is None)
+
+    def is_terraform_variable(self, variable):
+        return self.matches_regex_pattern(variable,'\${var.(.*)}')
 
     def get_terraform_variable_name(self, s):
         p = re.compile('\${var.(.*)}')
@@ -72,6 +73,7 @@ class Validator:
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))
 
+
     def assert_nested_resource_property_value_not_equals(self, resource_name, nested_resource_name, property, property_value, bool=True):
         self.assert_nested_resource_property_value_equals(resource_name, nested_resource_name, property,property_value, False)
 
@@ -94,5 +96,19 @@ class Validator:
             for required_property_name in required_properties:
                 if not required_property_name in property_names:
                     errors += ["[{0}.{1}.{2}] should have property: '{3}'".format(resource_name,resource, nested_resource_name,required_property_name)]
+        if len(errors) > 0:
+            raise AssertionError("\n".join(errors))
+
+    def assert_nested_resource_property_value_matches_regex(self, resource_name, nested_resource_name, property, regex, bool=True):
+        errors = []
+        resources = self.terraform_config['resource'][resource_name]
+        for resource in resources:
+            nested_resources = self.get_terraform_resources(nested_resource_name, resources[resource])
+            if not type(nested_resources) == list:
+                nested_resources = [nested_resources]
+            for nested_resource in nested_resources:
+                calculated_property_value = self.get_terraform_property_value(property, nested_resource)
+                if not self.matches_regex_pattern(str(calculated_property_value),regex) is bool:
+                    errors += ["[{0}.{1}.{2}.{3}] should match regex '{4}'. Is: '{5}'".format(resource_name, resource,nested_resource_name, property, regex, calculated_property_value)]
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))
