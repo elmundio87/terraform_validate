@@ -41,7 +41,7 @@ class Validator:
             return None
         for value in values:
             if self.is_terraform_variable(values[value]):
-                values[value] = self.terraform_config['variable'][get_terraform_variable_name(values[value])]['default']
+                values[value] = self.terraform_config['variable'][self.get_terraform_variable_name(values[value])]['default']
 
         return values[name]
 
