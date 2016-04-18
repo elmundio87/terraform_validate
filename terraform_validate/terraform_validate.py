@@ -100,10 +100,14 @@ class Validator:
         errors = []
         resources = self.get_terraform_resources(resource_name, self.terraform_config['resource'])
         for resource in resources:
-            property_names = self.get_terraform_resources(nested_resource_name, resources[resource])
-            for required_property_name in required_properties:
-                if not required_property_name in property_names:
-                    errors += ["[{0}.{1}.{2}] should have property: '{3}'".format(resource_name,resource, nested_resource_name,required_property_name)]
+            nested_resources = self.get_terraform_resources(nested_resource_name, resources[resource])
+            if not type(nested_resources) == list:
+                nested_resources = [nested_resources]
+            for nested_resource in nested_resources:
+                property_names = nested_resource.keys()
+                for required_property_name in required_properties:
+                    if not required_property_name in property_names:
+                        errors += ["[{0}.{1}.{2}] should have property: '{3}'".format(resource_name,resource, nested_resource_name,required_property_name)]
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))
 
