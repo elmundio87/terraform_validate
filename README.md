@@ -4,9 +4,9 @@ A python package that assists in the enforcement of user-defined standards in Te
 
 The validator uses `pyhcl` to parse Terraform configuration files, then tests the state of the config using custom Asserts.
 
-# Example Usages
+## Example Usages
 
-## Check that all `aws_ebs_volume` resources are encrypted
+### Check that all `aws_ebs_volume` resources are encrypted
 
 
 ```
@@ -31,7 +31,7 @@ resource "aws_ebs_volume" "foo" {
 }
 ```
 
-## Check that all nested `ebs_block_device` blocks inside `aws_instance` resources are encrypted
+### Check that all nested `ebs_block_device` blocks inside `aws_instance` resources are encrypted
 
 
 ```
