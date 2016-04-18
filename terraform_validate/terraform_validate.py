@@ -91,11 +91,11 @@ class Validator:
     def assert_resource_has_properties(self,resource_name,required_properties):
 
         def closure(resource):
-            errors = []
+            errors = ""
             property_names = resource.keys()
             for required_property_name in required_properties:
                 if not required_property_name in property_names:
-                    errors += "[{0}.{1}] should have property: '{2}'".format(resource_name, resource, required_property_name)
+                    errors += ["[{0}.{1}] should have property: '{2}'\n".format(resource_name, resource, required_property_name)]
             return errors
         self.assert_resource_base(resource_name, closure)
 
@@ -111,11 +111,11 @@ class Validator:
     def assert_nested_resource_has_properties(self, resource_name, nested_resource_name, required_properties):
 
         def closure(resource, nested_resource):
-            errors = []
+            errors = ""
             property_names = nested_resource.keys()
             for required_property_name in required_properties:
                 if not required_property_name in property_names:
-                    errors += "[{0}.{1}.{2}] should have property: '{3}'".format(resource_name, resource, nested_resource_name, required_property_name)
+                    errors += ["[{0}.{1}.{2}] should have property: '{3}'\n".format(resource_name, resource, nested_resource_name, required_property_name)]
             return errors
         self.assert_nested_resource_base(resource_name, nested_resource_name, closure)
 
