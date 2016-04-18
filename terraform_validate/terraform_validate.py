@@ -28,17 +28,17 @@ class Validator:
         return resources[name]
 
     def matches_regex_pattern(self,variable, regex):
+        return not (self.get_regex_matches(regex, variable) is None)
+
+    def get_regex_matches(self, regex, variable):
         p = re.compile(regex)
-        m = p.match(str(variable))
-        return not (m is None)
+        return p.match(str(variable))
 
     def is_terraform_variable(self, variable):
         return self.matches_regex_pattern(variable,'\${var.(.*)}')
 
     def get_terraform_variable_name(self, s):
-        p = re.compile('\${var.(.*)}')
-        m = p.match(s)
-        return m.group(1)
+        return self.get_regex_matches('\${var.(.*)}', s).group(1)
 
     def get_terraform_variable_value(self,variable):
         if ('variable' not in self.terraform_config.keys()) or (variable not in self.terraform_config['variable'].keys()):
@@ -54,83 +54,84 @@ class Validator:
 
         return values[name]
 
-    def assert_resource_property_value_equals(self,resource_name,property,property_value,bool=True):
+    def convert_to_list(self, nested_resources):
+        if not type(nested_resources) == list:
+            nested_resources = [nested_resources]
+        return nested_resources
+
+    def assert_resource_base(self,resource_name,closure):
         errors = []
         resources = self.get_terraform_resources(resource_name,self.terraform_config['resource'])
         for resource in resources:
-            calculated_property_value = self.get_terraform_property_value(property,resources[resource])
-            if not (str(calculated_property_value) == str(property_value)) is bool:
-                errors += ["[{0}.{1}.{2}] should be '{3}'. Is: '{4}'".format(resource_name,resource, property,property_value,calculated_property_value)]
+            error = closure(resources[resource])
+            if error is not None: errors += error
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))
 
-    def assert_resource_property_value_not_equals(self, resource_name, property, property_value):
-        self.assert_resource_property_value_equals(resource_name,property,property_value,False)
-
-    def assert_nested_resource_property_value_equals(self,resource_name,nested_resource_name,property,property_value,bool=True):
+    def assert_nested_resource_base(self, resource_name, nested_resource_name,closure):
         errors = []
         resources = self.get_terraform_resources(resource_name, self.terraform_config['resource'])
         for resource in resources:
-            nested_resources = self.get_terraform_resources(nested_resource_name,resources[resource])
-            if not type(nested_resources) == list:
-                nested_resources = [nested_resources]
+            nested_resources = self.convert_to_list(self.get_terraform_resources(nested_resource_name, resources[resource]))
             for nested_resource in nested_resources:
-                calculated_property_value = self.get_terraform_property_value(property,nested_resource)
-                if not (str(calculated_property_value) == str(property_value)) is bool:
-                    errors += ["[{0}.{1}.{2}.{3}] should be '{4}'. Is: '{5}'".format(resource_name,resource,nested_resource_name,property,property_value,calculated_property_value)]
+                error = closure(resource,nested_resource)
+                if error is not None: errors += error
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))
 
+    def assert_resource_property_value_equals(self,resource_name,property,property_value):
 
-    def assert_nested_resource_property_value_not_equals(self, resource_name, nested_resource_name, property, property_value, bool=True):
-        self.assert_nested_resource_property_value_equals(resource_name, nested_resource_name, property,property_value, False)
+        def closure(resource):
+            calculated_property_value = self.get_terraform_property_value(property,resource)
+            if not (str(calculated_property_value) == str(property_value)):
+                return ["[{0}.{1}.{2}] should be '{3}'. Is: '{4}'".format(resource_name,resource, property,property_value,calculated_property_value)]
+
+        self.assert_resource_base(resource_name, closure)
 
     def assert_resource_has_properties(self,resource_name,required_properties):
-        errors = []
-        resources = self.get_terraform_resources(resource_name, self.terraform_config['resource'])
-        for resource in resources:
-            property_names = resources[resource].keys()
+
+        def closure(resource):
+            property_names = resource.keys()
             for required_property_name in required_properties:
                 if not required_property_name in property_names:
-                    errors += ["[{0}.{1}] should have property: '{2}'".format(resource_name,resource,required_property_name)]
-        if len(errors) > 0:
-            raise AssertionError("\n".join(errors))
+                    return ["[{0}.{1}] should have property: '{2}'".format(resource_name, resource, required_property_name)]
 
-    def assert_nested_resource_has_properties(self,resource_name,nested_resource_name,required_properties):
-        errors = []
-        resources = self.get_terraform_resources(resource_name, self.terraform_config['resource'])
-        for resource in resources:
-            nested_resources = self.get_terraform_resources(nested_resource_name, resources[resource])
-            if not type(nested_resources) == list:
-                nested_resources = [nested_resources]
-            for nested_resource in nested_resources:
-                property_names = nested_resource.keys()
-                for required_property_name in required_properties:
-                    if not required_property_name in property_names:
-                        errors += ["[{0}.{1}.{2}] should have property: '{3}'".format(resource_name,resource, nested_resource_name,required_property_name)]
-        if len(errors) > 0:
-            raise AssertionError("\n".join(errors))
+        self.assert_resource_base(resource_name, closure)
 
-    def assert_resource_property_value_matches_regex(self, resource_name, property, regex, bool=True):
-        errors = []
-        resources = self.get_terraform_resources(resource_name, self.terraform_config['resource'])
-        for resource in resources:
-            calculated_property_value = self.get_terraform_property_value(property, resources[resource])
-            if not self.matches_regex_pattern(str(calculated_property_value),regex) is bool:
-                errors += ["[{0}.{1}.{2}] should match regex '{3}'. Is: '{4}'".format(resource_name, resource, property, regex, calculated_property_value)]
-        if len(errors) > 0:
-            raise AssertionError("\n".join(errors))
+    def assert_resource_property_value_matches_regex(self, resource_name, property, regex):
 
-    def assert_nested_resource_property_value_matches_regex(self, resource_name, nested_resource_name, property, regex, bool=True):
-        errors = []
-        resources = self.get_terraform_resources(resource_name, self.terraform_config['resource'])
-        for resource in resources:
-            nested_resources = self.get_terraform_resources(nested_resource_name, resources[resource])
-            if not type(nested_resources) == list:
-                nested_resources = [nested_resources]
-            for nested_resource in nested_resources:
-                calculated_property_value = self.get_terraform_property_value(property, nested_resource)
-                if not self.matches_regex_pattern(str(calculated_property_value),regex) is bool:
-                    errors += ["[{0}.{1}.{2}.{3}] should match regex '{4}'. Is: '{5}'".format(resource_name, resource,nested_resource_name, property, regex, calculated_property_value)]
-        if len(errors) > 0:
-            raise AssertionError("\n".join(errors))
+        def closure(resource):
+                calculated_property_value = self.get_terraform_property_value(property, resource)
+                if not self.matches_regex_pattern(str(calculated_property_value),regex):
+                    return ["[{0}.{1}.{2}] should match regex '{3}'. Is: '{4}'".format(resource_name, resource, property, regex, calculated_property_value)]
+
+        self.assert_resource_base(resource_name, closure)
+
+    def assert_nested_resource_has_properties(self, resource_name, nested_resource_name, required_properties):
+
+        def closure(resource, nested_resource):
+            property_names = nested_resource.keys()
+            for required_property_name in required_properties:
+                if not required_property_name in property_names:
+                    return ["[{0}.{1}.{2}] should have property: '{3}'".format(resource_name, resource, nested_resource_name, required_property_name)]
+
+        self.assert_nested_resource_base(resource_name, nested_resource_name, closure)
+
+    def assert_nested_resource_property_value_matches_regex(self, resource_name, nested_resource_name, property, regex):
+
+        def closure(resource, nested_resource):
+            calculated_property_value = self.get_terraform_property_value(property, nested_resource)
+            if not self.matches_regex_pattern(str(calculated_property_value), regex):
+                return [
+                    "[{0}.{1}.{2}.{3}] should match regex '{4}'. Is: '{5}'".format(resource_name, nested_resource_name, resource, property, regex, calculated_property_value)]
+
+        self.assert_nested_resource_base(resource_name, nested_resource_name, closure)
+
+    def assert_nested_resource_property_value_equals(self,resource_name,nested_resource_name,property,property_value,bool=True):
+
+        def closure(resource, nested_resource):
+            calculated_property_value = self.get_terraform_property_value(property, nested_resource)
+            if not (str(calculated_property_value) == str(property_value)) is bool:
+                return ["[{0}.{1}.{2}.{3}] should be '{4}'. Is: '{5}'".format(resource_name, resource, nested_resource_name, property, property_value, calculated_property_value)]
+
+        self.assert_nested_resource_base(resource_name, nested_resource_name, closure)
