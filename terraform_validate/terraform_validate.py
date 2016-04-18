@@ -107,6 +107,16 @@ class Validator:
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))
 
+    def assert_resource_property_value_matches_regex(self, resource_name, property, regex, bool=True):
+        errors = []
+        resources = self.terraform_config['resource'][resource_name]
+        for resource in resources:
+            calculated_property_value = self.get_terraform_property_value(property, resources[resource])
+            if not self.matches_regex_pattern(str(calculated_property_value),regex) is bool:
+                errors += ["[{0}.{1}.{2}] should match regex '{3}'. Is: '{4}'".format(resource_name, resource, property, regex, calculated_property_value)]
+        if len(errors) > 0:
+            raise AssertionError("\n".join(errors))
+
     def assert_nested_resource_property_value_matches_regex(self, resource_name, nested_resource_name, property, regex, bool=True):
         errors = []
         resources = self.terraform_config['resource'][resource_name]

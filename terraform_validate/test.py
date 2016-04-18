@@ -28,10 +28,13 @@ class TestEncryptionAtRest(unittest.TestCase):
         validator = t.Validator(os.path.join(self.path, "fixtures/nested_resource"))
         validator.assert_nested_resource_has_properties('aws_instance','nested_resource',required_properties)
 
+    def test_resource_property_value_matches_regex(self):
+        validator = t.Validator(os.path.join(self.path, "fixtures/resource"))
+        validator.assert_resource_property_value_matches_regex('aws_instance',"value",'[0-9]')
+
     def test_nested_resource_property_value_matches_regex(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/nested_resource"))
         validator.assert_nested_resource_property_value_matches_regex('aws_instance','nested_resource',"value",'[0-9]')
-
 
     def test_nonexistant_nested_resource_property_value_matches_regex_fails(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/nested_resource"))
