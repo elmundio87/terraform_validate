@@ -31,29 +31,16 @@ resource "aws_ebs_volume" "foo" {
 }
 ```
 
-### Check that all nested `ebs_block_device` blocks inside `aws_instance` resources are encrypted
+## Assertions
 
+### assert_resource_property_value_equals(resource,property,value)
+For all resources of type `resource`, check that the value of `property` matches `value`
 
-```
-import unittest
-import terraform_validate.terraform_validate as tf
-import os
+### assert_nested_resource_property_value_equals(resource,nested_resource,property,value)
+For all resources of type `resource`, check that all nested resources of type `nested_resource` have a property called `property` and that its value matches `value`
 
-class TestEncryptionAtRest(unittest.TestCase):
-    def setUp(self):
-        self.path = os.path.join(os.path.dirname(os.path.realpath(__file__)),"../terraform")
-        self.v = tf.Validator(self.path)
+### assert_resource_has_properties(resource,nested_resource,properties[])
+For all resources of type `resource`, check that they contain all the property names listed in `properties[]`. Any missing properties will cause an `AssertionError`.
 
-    def test_instance_ebs_block_device(self):
-        self.v.assert_nested_resource_property_value_equals('aws_instance','ebs_block_device','encrypted',True)
-
-```
-
-```
-resource "aws_instance" "foo" {
-  ebs_block_device {
-    # This would fail the test
-    encrypted = false
-  }
-}
-```
+### assert_nested_resource_has_properties(resource,nested_resource,properties[])
+For all resources of type `resource`, check that all nested resources of type `nested_resource` contain all the property names listed in `properties[]`. Any missing properties will cause an `AssertionError`.
