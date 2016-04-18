@@ -33,14 +33,14 @@ resource "aws_ebs_volume" "foo" {
 
 ## Assertions
 
-### assert_resource_property_value_equals(resource,property,value)
+#### assert_resource_property_value_equals(resource,property,value)
 For all resources of type `resource`, check that the value of `property` matches `value`
 
-### assert_nested_resource_property_value_equals(resource,nested_resource,property,value)
+#### assert_nested_resource_property_value_equals(resource,nested_resource,property,value)
 For all resources of type `resource`, check that all nested resources of type `nested_resource` have a property called `property` and that its value matches `value`
 
-### assert_resource_has_properties(resource,nested_resource,properties[])
+#### assert_resource_has_properties(resource,nested_resource,properties[])
 For all resources of type `resource`, check that they contain all the property names listed in `properties[]`. Any missing properties will cause an `AssertionError`.
 
-### assert_nested_resource_has_properties(resource,nested_resource,properties[])
+#### assert_nested_resource_has_properties(resource,nested_resource,properties[])
 For all resources of type `resource`, check that all nested resources of type `nested_resource` contain all the property names listed in `properties[]`. Any missing properties will cause an `AssertionError`.
