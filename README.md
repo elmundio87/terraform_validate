@@ -33,20 +33,20 @@ resource "aws_ebs_volume" "foo" {
 
 ## Assertions
 
-#### assert_resource_property_value_equals(resource,property,value)
-For all resources of type `resource`, check that the value of `property` equals `value`
+#### assert_resource_property_value_equals(resource_name,property,value)
+For all resources of type `resource_name`, check that the value of `property` equals `value`
 
-#### assert_nested_resource_property_value_equals(resource,nested_resource,property,value)
-For all resources of type `resource`, check that all nested resources of type `nested_resource` have a property called `property` and that its value equals `value`
+#### assert_nested_resource_property_value_equals(resource_name,nested_resource_name,property,value)
+For all resources of type `resource_name`, check that all nested resources of type `nested_resource_name` have a property called `property` and that its value equals `value`
 
-#### assert_resource_has_properties(resource,nested_resource,properties[])
-For all resources of type `resource`, check that they contain all the property names listed in `properties[]`. Any missing properties will cause an `AssertionError`.
+#### assert_resource_has_properties(resource_name,nested_resource_name,properties[])
+For all resources of type `resource_name`, check that they contain all the property names listed in `properties[]`. Any missing properties will cause an `AssertionError`.
 
-#### assert_nested_resource_has_properties(resource,nested_resource,properties[])
-For all resources of type `resource`, check that all nested resources of type `nested_resource` contain all the property names listed in `properties[]`. Any missing properties will cause an `AssertionError`.
+#### assert_nested_resource_has_properties(resource_name,nested_resource_name,properties[])
+For all resources of type `resource_name`, check that all nested resources of type `nested_resource_name` contain all the property names listed in `properties[]`. Any missing properties will cause an `AssertionError`.
 
-#### assert_resource_property_value_matches_regex(resource, property, regex)
-For all resources of type `resource`, check that the value of `property` matches regex `regex`
+#### assert_resource_property_value_matches_regex(resource_name, property, regex)
+For all resources of type `resource_name`, check that the value of `property` matches regex `regex`
 
-#### assert_nested_resource_property_value_matches_regex(resource, property, regex)
-For all resources of type `resource`, ccheck that all nested resources of type `nested_resource` have a property called `property` and that its value matches regex `regex`
+#### assert_nested_resource_property_value_matches_regex(resource_name, nested_resource_name, property, regex)
+For all resources of type `resource_name`, ccheck that all nested resources of type `nested_resource_name` have a property called `property` and that its value matches regex `regex`
