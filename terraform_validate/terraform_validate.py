@@ -43,6 +43,8 @@ class Validator:
     def get_terraform_variable_value(self,variable):
         if ('variable' not in self.terraform_config.keys()) or (variable not in self.terraform_config['variable'].keys()):
             raise TerraformVariableException("There is no Terraform variable '{0}'".format(variable))
+        if 'default' not in self.terraform_config['variable'][variable].keys():
+            return None
         return self.terraform_config['variable'][variable]['default']
 
     def get_terraform_property_value(self, name,values):
