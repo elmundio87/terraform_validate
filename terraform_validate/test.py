@@ -63,6 +63,12 @@ class TestEncryptionAtRest(unittest.TestCase):
         except t.TerraformVariableException:
             print ""
 
+    def test_properties_on_nonexistant_resource_type(self):
+        required_properties = ['value', 'value2']
+        validator = t.Validator(os.path.join(self.path, "fixtures/missing_variable"))
+        validator.assert_nested_resource_has_properties('aws_rds_instance', 'nested_resource', required_properties)
+
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestEncryptionAtRest)

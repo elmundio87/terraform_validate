@@ -69,7 +69,7 @@ class Validator:
 
     def assert_nested_resource_property_value_equals(self,resource_name,nested_resource_name,property,property_value,bool=True):
         errors = []
-        resources = self.terraform_config['resource'][resource_name]
+        resources = self.get_terraform_resources(resource_name, self.terraform_config['resource'])
         for resource in resources:
             nested_resources = self.get_terraform_resources(nested_resource_name,resources[resource])
             if not type(nested_resources) == list:
@@ -98,7 +98,7 @@ class Validator:
 
     def assert_nested_resource_has_properties(self,resource_name,nested_resource_name,required_properties):
         errors = []
-        resources = self.terraform_config['resource'][resource_name]
+        resources = self.get_terraform_resources(resource_name, self.terraform_config['resource'])
         for resource in resources:
             property_names = self.get_terraform_resources(nested_resource_name, resources[resource])
             for required_property_name in required_properties:
@@ -109,7 +109,7 @@ class Validator:
 
     def assert_resource_property_value_matches_regex(self, resource_name, property, regex, bool=True):
         errors = []
-        resources = self.terraform_config['resource'][resource_name]
+        resources = self.get_terraform_resources(resource_name, self.terraform_config['resource'])
         for resource in resources:
             calculated_property_value = self.get_terraform_property_value(property, resources[resource])
             if not self.matches_regex_pattern(str(calculated_property_value),regex) is bool:
@@ -119,7 +119,7 @@ class Validator:
 
     def assert_nested_resource_property_value_matches_regex(self, resource_name, nested_resource_name, property, regex, bool=True):
         errors = []
-        resources = self.terraform_config['resource'][resource_name]
+        resources = self.get_terraform_resources(resource_name, self.terraform_config['resource'])
         for resource in resources:
             nested_resources = self.get_terraform_resources(nested_resource_name, resources[resource])
             if not type(nested_resources) == list:
