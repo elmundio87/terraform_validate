@@ -5,6 +5,9 @@ import re
 class TerraformVariableException(Exception):
     pass
 
+class TerraformPropertyException(Exception):
+    pass
+
 class Validator:
 
     def __init__(self,path):
@@ -47,13 +50,24 @@ class Validator:
             return None
         return self.terraform_config['variable'][variable]['default']
 
+    def get_terraform_properties_that_match_regex(self,regex,properties):
+        out = {}
+        for property in properties:
+            if self.matches_regex_pattern(property,regex):
+                out[property] = properties[property]
+
+        if len(out.keys()) == 0:
+            raise TerraformPropertyException("No properties were found that match the regex '{0}' in {1}".format(regex,properties))
+
+        return out
+
     def get_terraform_property_value(self, name,values):
+
         if name not in values:
             return None
         for value in values:
             if self.is_terraform_variable(values[value]):
                 values[value] = self.get_terraform_variable_value(self.get_terraform_variable_name(values[value]))
-
         return values[name]
 
     def convert_to_list(self, nested_resources):
@@ -110,6 +124,17 @@ class Validator:
 
         self.assert_resource_base(resource_name, closure)
 
+    def assert_resource_regexproperty_value_equals(self, resource_name, regex, property_value):
+        def closure(resource):
+            properties = self.get_terraform_properties_that_match_regex(regex, resource)
+
+            for property in properties.keys():
+                calculated_property_value = self.get_terraform_property_value(property, resource)
+                if not (str(calculated_property_value) == str(property_value)):
+                    return ["[{0}.{1}.{2}] should be '{3}'. Is: '{4}'".format(resource_name, resource, property, property_value, calculated_property_value)]
+
+        self.assert_resource_base(resource_name, closure)
+
     def assert_nested_resource_has_properties(self, resource_name, nested_resource_name, required_properties):
 
         def closure(resource, nested_resource):
@@ -131,11 +156,23 @@ class Validator:
 
         self.assert_nested_resource_base(resource_name, nested_resource_name, closure)
 
-    def assert_nested_resource_property_value_equals(self,resource_name,nested_resource_name,property,property_value,bool=True):
+    def assert_nested_resource_property_value_equals(self,resource_name,nested_resource_name,property,property_value):
 
         def closure(resource, nested_resource):
             calculated_property_value = self.get_terraform_property_value(property, nested_resource)
-            if not (str(calculated_property_value) == str(property_value)) is bool:
+            if not (str(calculated_property_value) == str(property_value)):
                 return ["[{0}.{1}.{2}.{3}] should be '{4}'. Is: '{5}'".format(resource_name, resource, nested_resource_name, property, property_value, calculated_property_value)]
+
+        self.assert_nested_resource_base(resource_name, nested_resource_name, closure)
+
+
+    def assert_nested_resource_regexproperty_value_equals(self, resource_name, nested_resource_name, regex, property_value):
+        def closure(resource, nested_resource):
+            properties = self.get_terraform_properties_that_match_regex(regex,nested_resource)
+
+            for property in properties.keys():
+                calculated_property_value = self.get_terraform_property_value(property, nested_resource)
+                if not (str(calculated_property_value) == str(property_value)):
+                    return ["[{0}.{1}.{2}.{3}] should be '{4}'. Is: '{5}'".format(resource_name, resource, nested_resource_name, property, property_value, calculated_property_value)]
 
         self.assert_nested_resource_base(resource_name, nested_resource_name, closure)

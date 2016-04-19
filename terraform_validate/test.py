@@ -66,6 +66,14 @@ class TestEncryptionAtRest(unittest.TestCase):
         validator = t.Validator(os.path.join(self.path, "fixtures/missing_variable"))
         validator.assert_nested_resource_has_properties('aws_rds_instance', 'nested_resource', required_properties)
 
+    def test_searching_for_property_value_using_regex(self):
+        validator = t.Validator(os.path.join(self.path, "fixtures/regex_variables"))
+        validator.assert_resource_regexproperty_value_equals('aws_instance', '^CPM_Service_[A-Za-z]+$', 1)
+
+    def test_searching_for_nested_property_value_using_regex(self):
+        validator = t.Validator(os.path.join(self.path, "fixtures/regex_nested_variables"))
+        validator.assert_nested_resource_regexproperty_value_equals('aws_instance', 'tags', '^CPM_Service_[A-Za-z]+$', 1)
+
 
 
 if __name__ == '__main__':
