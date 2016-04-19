@@ -123,7 +123,7 @@ class Validator:
             properties = self.get_terraform_properties_that_match_regex(regex, resource)
 
             if len(properties.keys()) == 0:
-                return ["[{0}.{1}.{2}] No properties were found that match the regex '{3}'".format(resource_name, resource, regex)]
+                return ["[{0}.{1}] No properties were found that match the regex '{3}'".format(resource_name, resource, regex)]
 
             for property in properties.keys():
                 calculated_property_value = self.get_terraform_property_value(property, resource)
@@ -168,7 +168,7 @@ class Validator:
             properties = self.get_terraform_properties_that_match_regex(regex,nested_resource)
 
             if len(properties.keys()) == 0:
-                return["[{0}.{1}.{2}.{3}] No properties were found that match the regex '{4}'".format(resource_name, resource, nested_resource_name, regex)]
+                return["[{0}.{1}.{2}] No properties were found that match the regex '{3}'".format(resource_name, resource, nested_resource_name, regex)]
 
             for property in properties.keys():
                 calculated_property_value = self.get_terraform_property_value(property, nested_resource)
