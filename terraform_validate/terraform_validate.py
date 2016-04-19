@@ -5,9 +5,6 @@ import re
 class TerraformVariableException(Exception):
     pass
 
-class TerraformPropertyException(Exception):
-    pass
-
 class Validator:
 
     def __init__(self,path):
@@ -55,9 +52,6 @@ class Validator:
         for property in properties:
             if self.matches_regex_pattern(property,regex):
                 out[property] = properties[property]
-
-        if len(out.keys()) == 0:
-            raise TerraformPropertyException("No properties were found that match the regex '{0}' in {1}".format(regex,properties))
 
         return out
 
@@ -128,6 +122,9 @@ class Validator:
         def closure(resource):
             properties = self.get_terraform_properties_that_match_regex(regex, resource)
 
+            if len(properties.keys()) == 0:
+                return ["[{0}.{1}.{2}] No properties were found that match the regex '{3}'".format(resource_name, resource, property, regex)]
+
             for property in properties.keys():
                 calculated_property_value = self.get_terraform_property_value(property, resource)
                 if not (str(calculated_property_value) == str(property_value)):
@@ -169,6 +166,9 @@ class Validator:
     def assert_nested_resource_regexproperty_value_equals(self, resource_name, nested_resource_name, regex, property_value):
         def closure(resource, nested_resource):
             properties = self.get_terraform_properties_that_match_regex(regex,nested_resource)
+
+            if len(properties.keys()) == 0:
+                return["[{0}.{1}.{2}.{3}] No properties were found that match the regex '{4}'".format(resource_name, resource, nested_resource_name, property, regex)]
 
             for property in properties.keys():
                 calculated_property_value = self.get_terraform_property_value(property, nested_resource)
