@@ -104,6 +104,24 @@ class Validator:
             return self.resource_property_value_equals(resource_name, resource, resource_type, property, property_value)
         self.assert_nested_resource_base(resource_type, nested_resource_name, closure)
 
+    def resource_property_value_not_equals(self, resource_name, resource, resource_type, property, property_value):
+        calculated_property_value = self.get_terraform_property_value(property, resource)
+        if (str(calculated_property_value) == str(property_value)):
+            return ["[{0}.{1}.{2}] should not be '{3}'. Is: '{4}'".format(resource_type, resource_name, property, property_value, calculated_property_value)]
+        return []
+
+    def assert_resource_property_value_not_equals(self, resource_type, property, property_value):
+        def closure(resource_name, resource):
+            return self.resource_property_value_not_equals(resource_name, resource, resource_type, property, property_value)
+
+        self.assert_resource_base(resource_type, closure)
+
+    def assert_nested_resource_property_value_not_equals(self, resource_type, nested_resource_name, property, property_value):
+        def closure(resource_name, resource):
+            return self.resource_property_value_not_equals(resource_name, resource, resource_type, property, property_value)
+
+        self.assert_nested_resource_base(resource_type, nested_resource_name, closure)
+
     def resource_has_properties(self,resource_name,resource,resource_type,required_properties):
         errors = []
         property_names = resource.keys()

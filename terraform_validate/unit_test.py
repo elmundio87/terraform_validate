@@ -36,6 +36,17 @@ class TestValidatorUnit(unittest.TestCase):
         self.assertEqual(len(a),1)
         self.assertEqual(a[0],"[aws_instance.foo.value] should be '2'. Is: '1'")
 
+    def test_resource_property_value_not_equals_expected_value(self):
+        v = terraform_validate.Validator()
+        a = v.resource_property_value_not_equals("foo", {u'value': 1}, 'aws_instance', 'value', 2)
+        self.assertEqual(a, [])
+
+    def test_resource_property_value_not_equals_unexpected_value(self):
+        v = terraform_validate.Validator()
+        a = v.resource_property_value_not_equals("foo", {u'value': 1}, 'aws_instance', 'value', 1)
+        self.assertEqual(len(a), 1)
+        self.assertEqual(a[0], "[aws_instance.foo.value] should not be '1'. Is: '1'")
+
     def test_resource_has_properties_expected_values(self):
         v = terraform_validate.Validator()
         a = v.resource_has_properties("foo",{u'value1':1,u'value2':2},'aws_instance',['value1','value2'])

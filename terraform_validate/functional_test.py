@@ -16,6 +16,14 @@ class TestValidatorFunctional(unittest.TestCase):
         validator = t.Validator(os.path.join(self.path, "fixtures/nested_resource"))
         validator.assert_nested_resource_property_value_equals('aws_instance','nested_resource','value',1)
 
+    def test_resource_not_equals(self):
+        validator = t.Validator(os.path.join(self.path, "fixtures/resource"))
+        validator.assert_resource_property_value_not_equals('aws_instance', 'value', 0)
+
+    def test_nested_resource_not_equals(self):
+        validator = t.Validator(os.path.join(self.path, "fixtures/nested_resource"))
+        validator.assert_nested_resource_property_value_not_equals('aws_instance', 'nested_resource', 'value', 0)
+
     def test_resource_required_properties(self):
         required_properties = ['value', 'value2']
         validator = t.Validator(os.path.join(self.path, "fixtures/resource"))
