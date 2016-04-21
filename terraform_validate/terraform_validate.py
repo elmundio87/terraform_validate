@@ -95,21 +95,27 @@ class Validator:
         if not (str(calculated_property_value) == str(property_value)):
             return ["[{0}.{1}.{2}] should be '{3}'. Is: '{4}'".format(resource_type, resource_name, property, property_value,
                                                                       calculated_property_value)]
+        return []
 
     def assert_resource_property_value_equals(self,resource_type,property,property_value):
         def closure(resource_name, resource):
             return self.resource_property_value_equals(resource_name, resource, resource_type, property, property_value)
         self.assert_resource_base(resource_type, closure)
 
+    def resource_has_properties(self,resource_name,resource,resource_type,required_properties):
+        errors = []
+        property_names = resource.keys()
+        for required_property_name in required_properties:
+            if not required_property_name in property_names:
+                errors += ["[{0}.{1}] should have property: '{2}'".format(resource_type, resource_name,
+                                                                          required_property_name)]
+        return errors
+
     def assert_resource_has_properties(self,resource_type,required_properties):
 
         def closure(resource_name,resource):
-            errors = []
-            property_names = resource.keys()
-            for required_property_name in required_properties:
-                if not required_property_name in property_names:
-                    errors += ["[{0}.{1}] should have property: '{2}'".format(resource_type,resource_name, required_property_name)]
-            return errors
+            return self.resource_has_properties(resource_name,resource,resource_type,required_properties)
+
         self.assert_resource_base(resource_type, closure)
 
     def assert_resource_property_value_matches_regex(self, resource_type, property, regex):
