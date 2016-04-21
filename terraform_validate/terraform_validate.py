@@ -53,11 +53,9 @@ class Validator:
         for property in properties:
             if self.matches_regex_pattern(property,regex):
                 out[property] = properties[property]
-
         return out
 
     def get_terraform_property_value(self, name,values):
-
         if name not in values:
             return None
         for value in values:
@@ -131,13 +129,11 @@ class Validator:
         return []
 
     def assert_resource_property_value_matches_regex(self, resource_type, property, regex):
-
         def closure(resource_name,resource):
             return self.resource_property_value_matches_regex(resource_name, resource, resource_type, property, regex)
         self.assert_resource_base(resource_type, closure)
 
     def assert_nested_resource_property_value_matches_regex(self, resource_type, nested_resource_name, property, regex):
-
         def closure(resource_name, resource):
             return self.resource_property_value_matches_regex(resource_name, resource, resource_type, property, regex)
         self.assert_nested_resource_base(resource_type, nested_resource_name, closure)
@@ -146,14 +142,12 @@ class Validator:
         properties = self.get_terraform_properties_that_match_regex(regex, resource)
 
         if len(properties.keys()) == 0:
-            return [
-                "[{0}.{1}] No properties were found that match the regex '{2}'".format(resource_type, resource_name, regex)]
+            return ["[{0}.{1}] No properties were found that match the regex '{2}'".format(resource_type, resource_name, regex)]
 
         for property in properties.keys():
             calculated_property_value = self.get_terraform_property_value(property, resource)
             if not (str(calculated_property_value) == str(property_value)):
-                return ["[{0}.{1}.{2}] should be '{3}'. Is: '{4}'".format(resource_type, resource_name, property,
-                                                                          property_value, calculated_property_value)]
+                return ["[{0}.{1}.{2}] should be '{3}'. Is: '{4}'".format(resource_type, resource_name, property, property_value, calculated_property_value)]
         return []
 
     def assert_resource_regexproperty_value_equals(self, resource_type, regex, property_value):
