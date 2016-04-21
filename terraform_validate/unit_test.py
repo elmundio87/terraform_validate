@@ -89,5 +89,5 @@ class TestValidatorUnit(unittest.TestCase):
         self.assertEqual(a, ["[aws_instance.foo.my_property] should be '1'. Is: '2'"])
 
 if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestEncryptionAtRest)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestValidatorUnit)
     unittest.TextTestRunner(verbosity=0).run(suite)
