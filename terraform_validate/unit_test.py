@@ -1,29 +1,35 @@
 import unittest
 import terraform_validate
 
-class TestValidatorUnit(unittest.TestCase):
+class TestValidatorUnitHelper(unittest.TestCase):
 
     def test_get_terraform_resource_that_exists(self):
-        resources = {"foo":{u'value':1}}
+        resources = {"foo": {u'value': 1}}
         v = terraform_validate.Validator()
-        a = v.get_terraform_resources('foo',resources)
-        self.assertEqual(a,{u'value':1})
+        a = v.get_terraform_resources('foo', resources)
+        self.assertEqual(a, {u'value': 1})
 
     def test_get_terraform_resource_that_doesnt_exist(self):
-        resources = {"foo":{u'value':1}}
+        resources = {"foo": {u'value': 1}}
         v = terraform_validate.Validator()
-        a = v.get_terraform_resources('bar',resources)
-        self.assertEqual(a,[])
+        a = v.get_terraform_resources('bar', resources)
+        self.assertEqual(a, [])
 
     def test_matches_regex_is_true(self):
         v = terraform_validate.Validator()
-        a = v.matches_regex_pattern('abc_123','^abc_123$')
+        a = v.matches_regex_pattern('abc_123', '^abc_123$')
         self.assertTrue(a)
 
     def test_matches_regex_is_false(self):
         v = terraform_validate.Validator()
         a = v.matches_regex_pattern('abc_123', '^abc_321$')
         self.assertFalse(a)
+
+    if __name__ == '__main__':
+        suite = unittest.TestLoader().loadTestsFromTestCase(TestValidatorUnit)
+        unittest.TextTestRunner(verbosity=0).run(suite)
+
+class TestValidatorUnitAssertClosures(unittest.TestCase):
 
     def test_resource_property_value_equals_expected_value(self):
         v = terraform_validate.Validator()
@@ -89,5 +95,5 @@ class TestValidatorUnit(unittest.TestCase):
         self.assertEqual(a, ["[aws_instance.foo.my_property] should be '1'. Is: '2'"])
 
 if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestValidatorUnit)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestValidatorUnitAssert)
     unittest.TextTestRunner(verbosity=0).run(suite)
