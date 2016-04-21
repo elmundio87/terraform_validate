@@ -113,13 +113,11 @@ class Validator:
     def assert_resource_property_value_not_equals(self, resource_type, property, property_value):
         def closure(resource_name, resource):
             return self.resource_property_value_not_equals(resource_name, resource, resource_type, property, property_value)
-
         self.assert_resource_base(resource_type, closure)
 
     def assert_nested_resource_property_value_not_equals(self, resource_type, nested_resource_name, property, property_value):
         def closure(resource_name, resource):
             return self.resource_property_value_not_equals(resource_name, resource, resource_type, property, property_value)
-
         self.assert_nested_resource_base(resource_type, nested_resource_name, closure)
 
     def resource_has_properties(self,resource_name,resource,resource_type,required_properties):
