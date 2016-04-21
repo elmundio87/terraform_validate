@@ -5,13 +5,25 @@ class TestValidatorUnit(unittest.TestCase):
 
     def test_get_terraform_resource_that_exists(self):
         resources = {"foo":{u'value':1}}
-        a = terraform_validate.Validator.get_terraform_resources('foo',resources)
+        v = terraform_validate.Validator()
+        a = v.get_terraform_resources('foo',resources)
         self.assertEqual(a,{u'value':1})
 
     def test_get_terraform_resource_that_doesnt_exist(self):
         resources = {"foo":{u'value':1}}
-        a = terraform_validate.Validator.get_terraform_resources('bar',resources)
-        self.assertEqual(a,None)
+        v = terraform_validate.Validator()
+        a = v.get_terraform_resources('bar',resources)
+        self.assertEqual(a,[])
+
+    def test_matches_regex_is_true(self):
+        v = terraform_validate.Validator()
+        a = v.matches_regex_pattern('abc_123','^abc_123$')
+        self.assertTrue(a)
+
+    def test_matches_regex_is_false(self):
+        v = terraform_validate.Validator()
+        a = v.matches_regex_pattern('abc_123', '^abc_321$')
+        self.assertFalse(a)
 
     def test_resource_property_value_equals_expected_value(self):
         v = terraform_validate.Validator()

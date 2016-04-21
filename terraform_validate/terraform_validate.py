@@ -11,7 +11,6 @@ class Validator:
         if path is not None:
             self.terraform_config = self.parse_terraform_directory(path)
 
-    @classmethod
     def parse_terraform_directory(self,path):
 
         terraform_string = ""
@@ -24,30 +23,24 @@ class Validator:
         terraform = hcl.loads(terraform_string)
         return terraform
 
-    @classmethod
     def get_terraform_resources(self, name, resources):
         if name not in resources.keys():
             return []
         return resources[name]
 
-    @classmethod
     def matches_regex_pattern(self,variable, regex):
         return not (self.get_regex_matches(regex, variable) is None)
 
-    @classmethod
     def get_regex_matches(self, regex, variable):
         p = re.compile(regex)
         return p.match(str(variable))
 
-    @classmethod
     def is_terraform_variable(self, variable):
         return self.matches_regex_pattern(variable,'\${var.(.*)}')
 
-    @classmethod
     def get_terraform_variable_name(self, s):
         return self.get_regex_matches('\${var.(.*)}', s).group(1)
 
-    @classmethod
     def get_terraform_variable_value(self,variable):
         if ('variable' not in self.terraform_config.keys()) or (variable not in self.terraform_config['variable'].keys()):
             raise TerraformVariableException("There is no Terraform variable '{0}'".format(variable))
@@ -55,7 +48,6 @@ class Validator:
             return None
         return self.terraform_config['variable'][variable]['default']
 
-    @classmethod
     def get_terraform_properties_that_match_regex(self,regex,properties):
         out = {}
         for property in properties:
@@ -64,7 +56,6 @@ class Validator:
 
         return out
 
-    @classmethod
     def get_terraform_property_value(self, name,values):
 
         if name not in values:
@@ -74,7 +65,6 @@ class Validator:
                 values[value] = self.get_terraform_variable_value(self.get_terraform_variable_name(values[value]))
         return values[name]
 
-    @classmethod
     def convert_to_list(self, nested_resources):
         if not type(nested_resources) == list:
             nested_resources = [nested_resources]
