@@ -30,6 +30,16 @@ class TestValidatorUnit(unittest.TestCase):
         self.assertEqual(a, ["[aws_instance.foo] should have property: 'value3'",
                              "[aws_instance.foo] should have property: 'value4'"])
 
+    def test_resource_value_matches_regex_expected_value(self):
+        v = terraform_validate.Validator()
+        a = v.resource_value_matches_regex("foo", {u'value': '1'}, 'aws_instance','value', '[0-9]')
+        self.assertEqual(a, [])
+
+    def test_resource_value_matches_regex_unexpected_value(self):
+        v = terraform_validate.Validator()
+        a = v.resource_value_matches_regex("foo", {u'value': 'a'}, 'aws_instance','value', '[0-9]')
+        self.assertEqual(a, ["[aws_instance.foo.value] should match regex '[0-9]'. Is: 'a'"])
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestEncryptionAtRest)

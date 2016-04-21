@@ -118,12 +118,17 @@ class Validator:
 
         self.assert_resource_base(resource_type, closure)
 
+    def resource_value_matches_regex(self,resource_name,resource,resource_type,property,regex):
+        calculated_property_value = self.get_terraform_property_value(property, resource)
+        if not self.matches_regex_pattern(str(calculated_property_value), regex):
+            return ["[{0}.{1}.{2}] should match regex '{3}'. Is: '{4}'".format(resource_type, resource_name, property,
+                                                                               regex, calculated_property_value)]
+        return []
+
     def assert_resource_property_value_matches_regex(self, resource_type, property, regex):
 
         def closure(resource_name,resource):
-                calculated_property_value = self.get_terraform_property_value(property, resource)
-                if not self.matches_regex_pattern(str(calculated_property_value),regex):
-                    return ["[{0}.{1}.{2}] should match regex '{3}'. Is: '{4}'".format(resource_type, resource_name, property, regex, calculated_property_value)]
+            return self.resource_value_matches_regex(resource_name,resource,resource_type,property,regex)
 
         self.assert_resource_base(resource_type, closure)
 
