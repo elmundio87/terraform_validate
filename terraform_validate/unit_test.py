@@ -40,6 +40,22 @@ class TestValidatorUnit(unittest.TestCase):
         a = v.resource_value_matches_regex("foo", {u'value': 'a'}, 'aws_instance','value', '[0-9]')
         self.assertEqual(a, ["[aws_instance.foo.value] should match regex '[0-9]'. Is: 'a'"])
 
+    def test_resource_regexproperty_value_equals_expected_value(self):
+        v = terraform_validate.Validator()
+        a = v.resource_regexproperty_value_equals("foo", {u'my_property':1}, 'aws_instance', '^my_', 1)
+        self.assertEqual(a, [])
+
+    def test_resource_regexproperty_value_equals_missing_property(self):
+        v = terraform_validate.Validator()
+        a = v.resource_regexproperty_value_equals("foo", {u'mein_property':1}, 'aws_instance', '^my_', 1)
+        self.assertEqual(a, ["[aws_instance.foo] No properties were found that match the regex '^my_'"])
+
+    def test_resource_regexproperty_value_equals_wrong_value(self):
+        v = terraform_validate.Validator()
+        a = v.resource_regexproperty_value_equals("foo", {u'my_property':2}, 'aws_instance', '^my_', 1)
+        self.assertEqual(a, ["[aws_instance.foo.my_property] should be '1'. Is: '2'"])
+
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestEncryptionAtRest)

@@ -132,17 +132,23 @@ class Validator:
 
         self.assert_resource_base(resource_type, closure)
 
+    def resource_regexproperty_value_equals(self,resource_name,resource,resource_type,regex,property_value):
+        properties = self.get_terraform_properties_that_match_regex(regex, resource)
+
+        if len(properties.keys()) == 0:
+            return [
+                "[{0}.{1}] No properties were found that match the regex '{2}'".format(resource_type, resource_name, regex)]
+
+        for property in properties.keys():
+            calculated_property_value = self.get_terraform_property_value(property, resource)
+            if not (str(calculated_property_value) == str(property_value)):
+                return ["[{0}.{1}.{2}] should be '{3}'. Is: '{4}'".format(resource_type, resource_name, property,
+                                                                          property_value, calculated_property_value)]
+        return []
+
     def assert_resource_regexproperty_value_equals(self, resource_type, regex, property_value):
         def closure(resource_name,resource):
-            properties = self.get_terraform_properties_that_match_regex(regex, resource)
-
-            if len(properties.keys()) == 0:
-                return ["[{0}.{1}] No properties were found that match the regex '{3}'".format(resource_type, resource, regex)]
-
-            for property in properties.keys():
-                calculated_property_value = self.get_terraform_property_value(property, resource)
-                if not (str(calculated_property_value) == str(property_value)):
-                    return ["[{0}.{1}.{2}] should be '{3}'. Is: '{4}'".format(resource_type, resource_name, property, property_value, calculated_property_value)]
+            return self.resource_regexproperty_value_equals(resource_name,resource,resource_type,regex,property_value)
 
         self.assert_resource_base(resource_type, closure)
 
