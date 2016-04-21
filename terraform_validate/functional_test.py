@@ -48,7 +48,7 @@ class TestValidatorFunctional(unittest.TestCase):
             validator.assert_nested_resource_property_value_matches_regex('aws_instance', 'nested_resource', "value3", '[0-9]')
             self.fail() #Fail if the above code passes
         except AssertionError:
-            print ""
+            print("")
 
     def test_variable_substitution(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/variable_substitution"))
@@ -60,14 +60,14 @@ class TestValidatorFunctional(unittest.TestCase):
             validator.assert_resource_property_value_equals('aws_instance','value',1)
             self.fail() #Fail if the above code passes
         except t.TerraformVariableException:
-            print ""
+            print("")
 
         validator = t.Validator(os.path.join(self.path, "fixtures/no_variables"))
         try:
             validator.assert_resource_property_value_equals('aws_instance','value',1)
             self.fail() #Fail if the above code passes
         except t.TerraformVariableException:
-            print ""
+            print("")
 
     def test_properties_on_nonexistant_resource_type(self):
         required_properties = ['value', 'value2']
