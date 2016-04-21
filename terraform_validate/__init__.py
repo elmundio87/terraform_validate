@@ -1,1 +1,1 @@
-from . import terraform_validate
+from .terraform_validate import *
