@@ -94,7 +94,7 @@ class Validator:
         def closure(resource):
             calculated_property_value = self.get_terraform_property_value(property,resource)
             if not (str(calculated_property_value) == str(property_value)):
-                return ["[{0}.{1}.{2}] should be '{3}'. Is: '{4}'".format(resource_name,resource, property,property_value,calculated_property_value)]
+                return ["[{0}.{1}.{2}] should be '{3}'. Is: '{4}'".format(resource_name, resource, property, property_value, calculated_property_value)]
 
         self.assert_resource_base(resource_name, closure)
 
@@ -149,7 +149,7 @@ class Validator:
             calculated_property_value = self.get_terraform_property_value(property, nested_resource)
             if not self.matches_regex_pattern(str(calculated_property_value), regex):
                 return [
-                    "[{0}.{1}.{2}.{3}] should match regex '{4}'. Is: '{5}'".format(resource_name, nested_resource_name, resource, property, regex, calculated_property_value)]
+                    "[{0}.{1}.{2}.{3}] should match regex '{4}'. Is: '{5}'".format(resource_name, resource, nested_resource_name, property, regex, calculated_property_value)]
 
         self.assert_nested_resource_base(resource_name, nested_resource_name, closure)
 
