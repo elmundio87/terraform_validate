@@ -4,7 +4,7 @@ import unittest
 #sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../src")
 import terraform_validate as t
 
-class TestEncryptionAtRest(unittest.TestCase):
+class TestValidatorFunctional(unittest.TestCase):
     def setUp(self):
         self.path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
 

@@ -7,8 +7,9 @@ class TerraformVariableException(Exception):
 
 class Validator:
 
-    def __init__(self,path):
-        self.terraform_config = self.parse_terraform_directory(path)
+    def __init__(self,path=None):
+        if path is not None:
+            self.terraform_config = self.parse_terraform_directory(path)
 
     def parse_terraform_directory(self,path):
 
@@ -89,13 +90,15 @@ class Validator:
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))
 
+    def resource_property_value_equals(self,resource,resource_name,property,property_value):
+        calculated_property_value = self.get_terraform_property_value(property, resource)
+        if not (str(calculated_property_value) == str(property_value)):
+            return ["[{0}.{1}.{2}] should be '{3}'. Is: '{4}'".format(resource_name, resource, property, property_value,
+                                                                      calculated_property_value)]
+
     def assert_resource_property_value_equals(self,resource_name,property,property_value):
-
         def closure(resource):
-            calculated_property_value = self.get_terraform_property_value(property,resource)
-            if not (str(calculated_property_value) == str(property_value)):
-                return ["[{0}.{1}.{2}] should be '{3}'. Is: '{4}'".format(resource_name, resource, property, property_value, calculated_property_value)]
-
+            return self.resource_property_value_equals(resource,resource_name,property,property_value)
         self.assert_resource_base(resource_name, closure)
 
     def assert_resource_has_properties(self,resource_name,required_properties):
@@ -161,7 +164,6 @@ class Validator:
                 return ["[{0}.{1}.{2}.{3}] should be '{4}'. Is: '{5}'".format(resource_name, resource, nested_resource_name, property, property_value, calculated_property_value)]
 
         self.assert_nested_resource_base(resource_name, nested_resource_name, closure)
-
 
     def assert_nested_resource_regexproperty_value_equals(self, resource_name, nested_resource_name, regex, property_value):
         def closure(resource, nested_resource):
