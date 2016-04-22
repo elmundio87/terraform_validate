@@ -80,7 +80,13 @@ class TestValidatorFunctional(unittest.TestCase):
         validator = t.Validator(os.path.join(self.path, "fixtures/regex_nested_variables"))
         validator.assert_nested_resource_regexproperty_value_equals('aws_instance', 'tags', '^CPM_Service_[A-Za-z]+$', 1)
 
+    def test_resource_type_list(self):
+        validator = t.Validator(os.path.join(self.path, "fixtures/resource"))
+        validator.assert_resource_property_value_equals(['aws_instance','aws_elb'], 'value', 1)
 
+    def test_nested_resource_type_list(self):
+        validator = t.Validator(os.path.join(self.path, "fixtures/nested_resource"))
+        validator.assert_nested_resource_property_value_equals(['aws_instance','aws_elb'],'tags', 'value', 1)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestValidatorFunctional)

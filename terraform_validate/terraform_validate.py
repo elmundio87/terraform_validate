@@ -26,7 +26,7 @@ class Validator:
     def get_terraform_resources(self, name, resources):
         if name not in resources.keys():
             return []
-        return resources[name]
+        return self.convert_to_list(resources[name])
 
     def matches_regex_pattern(self,variable, regex):
         return not (self.get_regex_matches(regex, variable) is None)
@@ -68,23 +68,39 @@ class Validator:
             nested_resources = [nested_resources]
         return nested_resources
 
-    def assert_resource_base(self, resource_type, closure):
+    def assert_resource_base(self, resource_types, closure):
         errors = []
-        resources = self.get_terraform_resources(resource_type, self.terraform_config['resource'])
-        for resource in resources:
-            error = closure(resource,resources[resource])
-            if error is not None: errors += error
+        resources = {}
+        resource_types = self.convert_to_list(resource_types)
+        for resource_type in resource_types:
+            if resource_type not in resources.keys():
+                resources[resource_type] = []
+            resources[resource_type] += self.get_terraform_resources(resource_type, self.terraform_config['resource'])
+
+        for resource_type in resource_types:
+            for resource in resources[resource_type]:
+                    for resource_name in resource.keys():
+                        error = closure(resource_type, resource_name,resource[resource_name])
+                    if error is not None: errors += error
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))
 
-    def assert_nested_resource_base(self, resource_type, nested_resource_name, closure):
+    def assert_nested_resource_base(self, resource_types, nested_resource_name, closure):
         errors = []
-        resources = self.get_terraform_resources(resource_type, self.terraform_config['resource'])
-        for resource in resources:
-            nested_resources = self.convert_to_list(self.get_terraform_resources(nested_resource_name, resources[resource]))
-            for nested_resource in nested_resources:
-                error = closure("{0}.{1}".format(resource,nested_resource_name),nested_resource)
-                if error is not None: errors += error
+        resources = {}
+        resource_types = self.convert_to_list(resource_types)
+        for resource_type in resource_types:
+            if resource_type not in resources.keys():
+                resources[resource_type] = []
+            resources[resource_type] += self.get_terraform_resources(resource_type, self.terraform_config['resource'])
+
+        for resource_type in resource_types:
+            for resource in resources[resource_type]:
+                for resource_name in resource.keys():
+                    nested_resources = self.convert_to_list(self.get_terraform_resources(nested_resource_name, resource[resource_name]))
+                    for nested_resource in nested_resources:
+                        error = closure(resource_type, "{0}.{1}".format(resource_name,nested_resource_name),nested_resource)
+                        if error is not None: errors += error
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))
 
@@ -95,12 +111,12 @@ class Validator:
         return []
 
     def assert_resource_property_value_equals(self,resource_type,property,property_value):
-        def closure(resource_name, resource):
+        def closure(resource_type, resource_name, resource):
             return self.resource_property_value_equals(resource_name, resource, resource_type, property, property_value)
         self.assert_resource_base(resource_type, closure)
 
     def assert_nested_resource_property_value_equals(self, resource_type, nested_resource_name, property, property_value):
-        def closure(resource_name, resource):
+        def closure(resource_type, resource_name, resource):
             return self.resource_property_value_equals(resource_name, resource, resource_type, property, property_value)
         self.assert_nested_resource_base(resource_type, nested_resource_name, closure)
 
@@ -111,12 +127,12 @@ class Validator:
         return []
 
     def assert_resource_property_value_not_equals(self, resource_type, property, property_value):
-        def closure(resource_name, resource):
+        def closure(resource_type, resource_name, resource):
             return self.resource_property_value_not_equals(resource_name, resource, resource_type, property, property_value)
         self.assert_resource_base(resource_type, closure)
 
     def assert_nested_resource_property_value_not_equals(self, resource_type, nested_resource_name, property, property_value):
-        def closure(resource_name, resource):
+        def closure(resource_type, resource_name, resource):
             return self.resource_property_value_not_equals(resource_name, resource, resource_type, property, property_value)
         self.assert_nested_resource_base(resource_type, nested_resource_name, closure)
 
@@ -129,12 +145,12 @@ class Validator:
         return errors
 
     def assert_resource_has_properties(self,resource_type,required_properties):
-        def closure(resource_name,resource):
+        def closure(resource_type, resource_name,resource):
             return self.resource_has_properties(resource_name,resource,resource_type,required_properties)
         self.assert_resource_base(resource_type, closure)
 
     def assert_nested_resource_has_properties(self, resource_type, nested_resource_name, required_properties):
-        def closure(resource_name, resource):
+        def closure(resource_type, resource_name, resource):
             return self.resource_has_properties(resource_name, resource, resource_type, required_properties)
         self.assert_nested_resource_base(resource_type, nested_resource_name, closure)
 
@@ -145,12 +161,12 @@ class Validator:
         return []
 
     def assert_resource_property_value_matches_regex(self, resource_type, property, regex):
-        def closure(resource_name,resource):
+        def closure(resource_type, resource_name,resource):
             return self.resource_property_value_matches_regex(resource_name, resource, resource_type, property, regex)
         self.assert_resource_base(resource_type, closure)
 
     def assert_nested_resource_property_value_matches_regex(self, resource_type, nested_resource_name, property, regex):
-        def closure(resource_name, resource):
+        def closure(resource_type, resource_name, resource):
             return self.resource_property_value_matches_regex(resource_name, resource, resource_type, property, regex)
         self.assert_nested_resource_base(resource_type, nested_resource_name, closure)
 
@@ -167,12 +183,12 @@ class Validator:
         return []
 
     def assert_resource_regexproperty_value_equals(self, resource_type, regex, property_value):
-        def closure(resource_name,resource):
+        def closure(resource_type, resource_name,resource):
             return self.resource_regexproperty_value_equals(resource_name,resource,resource_type,regex,property_value)
         self.assert_resource_base(resource_type, closure)
 
     def assert_nested_resource_regexproperty_value_equals(self, resource_type, nested_resource_name, regex, property_value):
-        def closure(resource_name, resource):
+        def closure(resource_type, resource_name, resource):
             return self.resource_regexproperty_value_equals(resource_name, resource, resource_type, regex, property_value)
         self.assert_nested_resource_base(resource_type, nested_resource_name, closure)
 

@@ -4,3 +4,16 @@ resource "aws_instance" "foo" {
     value2 = 2
 
 }
+
+resource "aws_instance" "bar" {
+
+    value = 1
+    value2 = 2
+
+}
+
+resource "aws_elb" "buzz" {
+
+    value = 1
+
+}
