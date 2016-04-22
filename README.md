@@ -8,26 +8,37 @@ The validator uses `pyhcl` to parse Terraform configuration files, then tests th
 
 ## Example Usages
 
-### Check that all `aws_ebs_volume` resources are encrypted
+### Check that all AWS EBS volumes are encrypted
 
 
 ```
-import unittest
-import terraform_validate.terraform_validate as tf
-import os
-
 class TestEncryptionAtRest(unittest.TestCase):
+
     def setUp(self):
         self.path = os.path.join(os.path.dirname(os.path.realpath(__file__)),"../terraform")
-        self.v = tf.Validator(self.path)
+        self.v = terraform_validate.Validator(self.path)
 
     def test_aws_ebs_volume(self):
         self.v.assert_resource_property_value_equals('aws_ebs_volume','encrypted',True)
 
+    def test_instance_ebs_block_device(self):
+        self.v.assert_nested_resource_property_value_equals('aws_instance','ebs_block_device','encrypted',True)
+
+if __name__ == '__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestEncryptionAtRest)
+    unittest.TextTestRunner(verbosity=0).run(suite)
+
 ```
 
 ```
-resource "aws_ebs_volume" "foo" {
+resource "aws_instance" "foo" {
+  # This would fail the test
+  ebs_block_device{
+    encrypted = false
+  }
+}
+
+resource "aws_ebs_volume" "bar" {
   # This would fail the test
   encrypted = false
 }
