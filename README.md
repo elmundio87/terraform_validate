@@ -77,5 +77,8 @@ For all resources of type `resource_type`, check that the value of `property` ma
 #### assert_nested_resource_property_value_matches_regex(resource_type, nested_resource_type, property, regex)
 For all resources of type `resource_type`, ccheck that all nested resources of type `nested_resource_type` have a property called `property` and that its value matches regex `regex`
 
-#### assert_resource_regexproperty_value_equals(resource_type, regex, value
-For all resources of type `resource_type`, check that all nested resources of type `nested_resource_type` has a property that matches `regex`, and that its value is set to `value`
+#### assert_resource_regexproperty_value_equals(resource_type, regex, value)
+For all resources of type `resource_type`, check that it has a property with a name that matches `regex`, and that its value is set to `value`
+
+#### assert_resource_regexproperty_value_equals(resource_type, nested_resource_type regex, value)
+For all resources of type `resource_type`, check that all nested resources of type `nested_resource_type` has a property with a name that matches `regex`, and that its value is set to `value`
