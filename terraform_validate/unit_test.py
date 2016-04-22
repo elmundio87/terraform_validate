@@ -7,7 +7,7 @@ class TestValidatorUnitHelper(unittest.TestCase):
         resources = {"foo": {'value': 1}}
         v = t.Validator()
         a = v.get_terraform_resources('foo', resources)
-        self.assertEqual(a, {'value': 1})
+        self.assertEqual(a, [{'value': 1}])
 
     def test_get_terraform_resource_that_doesnt_exist(self):
         resources = {"foo": {'value': 1}}
