@@ -77,6 +77,9 @@ class TestValidatorFunctional(unittest.TestCase):
         validator = t.Validator(os.path.join(self.path, "fixtures/nested_resource"))
         validator.assert_nested_resource_property_value_equals(['aws_instance','aws_elb'],'tags', 'value', 1)
 
+    def test_invalid_terraform_syntax(self):
+        self.assertRaises(t.TerraformSyntaxException, t.Validator,os.path.join(self.path, "fixtures/invalid_syntax"))
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestValidatorFunctional)
     unittest.TextTestRunner(verbosity=0).run(suite)
