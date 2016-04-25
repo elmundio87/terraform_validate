@@ -2,6 +2,9 @@ import hcl
 import os
 import re
 
+class TerraformSyntaxException(Exception):
+    pass
+
 class TerraformVariableException(Exception):
     pass
 
@@ -18,8 +21,13 @@ class Validator:
             for file in files:
                 if (file.endswith(".tf")):
                     with open(os.path.join(directory, file)) as fp:
-                        terraform_string += fp.read()
-
+                        new_terraform = fp.read()
+                        try:
+                            hcl.loads(new_terraform)
+                        except ValueError,e:
+                            print 'Error in Terraform syntax: {0}'.format(e)
+                            raise TerraformSyntaxException("Invalid terraform configuration in {0}\n{1}".format(os.path.join(directory,file),e))
+                        terraform_string += new_terraform
         terraform = hcl.loads(terraform_string)
         return terraform
 
