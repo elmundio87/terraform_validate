@@ -98,8 +98,8 @@ class Validator:
             for resource in resources[resource_type]:
                 for resource_name in resource.keys():
                     nested_resources = self.convert_to_list(self.get_terraform_resources(nested_resource_name, resource[resource_name]))
-                    if len(nested_resources) == 0:
-                        errors += ["[{0}.{1}] is missing nested resource '{2}'".format(resource_type, resource_name, nested_resource_name)]
+                    #if len(nested_resources) == 0:
+                    #    errors += ["[{0}.{1}] is missing nested resource '{2}'".format(resource_type, resource_name, nested_resource_name)]
                     for nested_resource in nested_resources:
                         error = closure(resource_type, "{0}.{1}".format(resource_name,nested_resource_name),nested_resource)
                         if error is not None: errors += error
