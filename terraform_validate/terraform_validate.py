@@ -25,7 +25,6 @@ class Validator:
                         try:
                             hcl.loads(new_terraform)
                         except ValueError as e:
-                            print('Error in Terraform syntax: {0}'.format(e))
                             raise TerraformSyntaxException("Invalid terraform configuration in {0}\n{1}".format(os.path.join(directory,file),e))
                         terraform_string += new_terraform
         terraform = hcl.loads(terraform_string)
