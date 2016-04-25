@@ -42,11 +42,7 @@ class TestValidatorFunctional(unittest.TestCase):
 
     def test_nonexistant_nested_resource_property_value_matches_regex_fails(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/nested_resource"))
-        try:
-            validator.assert_nested_resource_property_value_matches_regex('aws_instance', 'nested_resource', "value3", '[0-9]')
-            self.fail() #Fail if the above code passes
-        except AssertionError:
-            print("")
+        self.assertRaises(AssertionError,validator.assert_nested_resource_property_value_matches_regex,'aws_instance', 'nested_resource', "value3", '[0-9]')
 
     def test_variable_substitution(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/variable_substitution"))
@@ -54,18 +50,12 @@ class TestValidatorFunctional(unittest.TestCase):
 
     def test_missing_variable_substitution(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/missing_variable"))
-        try:
-            validator.assert_resource_property_value_equals('aws_instance','value',1)
-            self.fail() #Fail if the above code passes
-        except t.TerraformVariableException:
-            print("")
+        self.assertRaises(t.TerraformVariableException,validator.assert_resource_property_value_equals,'aws_instance','value',1)
 
-        validator = t.Validator(os.path.join(self.path, "fixtures/no_variables"))
-        try:
-            validator.assert_resource_property_value_equals('aws_instance','value',1)
-            self.fail() #Fail if the above code passes
-        except t.TerraformVariableException:
-            print("")
+
+    def test_missing_required_nested_resource_fails(self):
+        validator = t.Validator(os.path.join(self.path, "fixtures/resource"))
+        self.assertRaises(AssertionError,validator.assert_nested_resource_property_value_equals,'aws_instance', 'tags', 'encrypted', 1)
 
     def test_properties_on_nonexistant_resource_type(self):
         required_properties = ['value', 'value2']
