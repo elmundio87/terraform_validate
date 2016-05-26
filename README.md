@@ -12,16 +12,21 @@ The validator uses `pyhcl` to parse Terraform configuration files, then tests th
 
 
 ```
+import terraform_validate
+
 class TestEncryptionAtRest(unittest.TestCase):
 
     def setUp(self):
+        # Tell the module where to find your terraform configuration folder
         self.path = os.path.join(os.path.dirname(os.path.realpath(__file__)),"../terraform")
         self.v = terraform_validate.Validator(self.path)
 
     def test_aws_ebs_volume(self):
+        # Assert that all resources of type 'aws_ebs_volume' are encrypted
         self.v.assert_resource_property_value_equals('aws_ebs_volume','encrypted',True)
 
     def test_instance_ebs_block_device(self):
+        # Assert that all resources of type 'ebs_block_device' that are inside a 'aws_instance' are encrypted
         self.v.assert_nested_resource_property_value_equals('aws_instance','ebs_block_device','encrypted',True)
 
 if __name__ == '__main__':
