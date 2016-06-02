@@ -62,8 +62,8 @@ class Validator:
                 out[property] = properties[property]
         return out
 
-    def list_terraform_variables_in_string(self, string):
-        return []
+    def list_terraform_variables_in_string(self, s):
+        return re.findall('\${var.(\w+)}',s)
 
     def get_terraform_property_value(self, name,values):
         if name not in values:
