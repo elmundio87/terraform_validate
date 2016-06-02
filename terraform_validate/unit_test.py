@@ -45,6 +45,11 @@ class TestValidatorUnitHelper(unittest.TestCase):
         a = v.list_terraform_variables_in_string("a${var.abc}b${var.def}c")
         self.assertEqual(a,["abc","def"])
 
+    def test_handle_finding_variables_in_non_string_object(self):
+        v = t.Validator()
+        a = v.list_terraform_variables_in_string(1)
+        self.assertEqual(a, [])
+
     if __name__ == '__main__':
         suite = unittest.TestLoader().loadTestsFromTestCase(TestValidatorUnitHelper)
         unittest.TextTestRunner(verbosity=0).run(suite)
