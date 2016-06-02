@@ -25,6 +25,11 @@ class TestValidatorUnitHelper(unittest.TestCase):
         a = v.matches_regex_pattern('abc_123', '^abc_321$')
         self.assertFalse(a)
 
+    def test_can_find_one_variable_in_string(self):
+        v = t.Validator()
+        a = v.list_terraform_variables_in_string("${var.a}${var.b}")
+        self.assertEqual(a,["a","b"])
+
     if __name__ == '__main__':
         suite = unittest.TestLoader().loadTestsFromTestCase(TestValidatorUnitHelper)
         unittest.TextTestRunner(verbosity=0).run(suite)
