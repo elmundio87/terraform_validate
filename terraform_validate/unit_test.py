@@ -25,6 +25,31 @@ class TestValidatorUnitHelper(unittest.TestCase):
         a = v.matches_regex_pattern('abc_123', '^abc_321$')
         self.assertFalse(a)
 
+    def test_can_handle_no_variables_in_string(self):
+        v = t.Validator()
+        a = v.list_terraform_variables_in_string("wibble")
+        self.assertEqual(a,[])
+
+    def test_can_find_one_variable_in_string(self):
+        v = t.Validator()
+        a = v.list_terraform_variables_in_string("${var.abc}")
+        self.assertEqual(a,["abc"])
+
+    def test_can_find_multiple_variables_in_string(self):
+        v = t.Validator()
+        a = v.list_terraform_variables_in_string("${var.abc}${var.def}")
+        self.assertEqual(a,["abc","def"])
+
+    def test_can_find_multiple_variables_in_complex_string(self):
+        v = t.Validator()
+        a = v.list_terraform_variables_in_string("a${var.abc}b${var.def}c")
+        self.assertEqual(a,["abc","def"])
+
+    def test_handle_finding_variables_in_non_string_object(self):
+        v = t.Validator()
+        a = v.list_terraform_variables_in_string(1)
+        self.assertEqual(a, [])
+
     if __name__ == '__main__':
         suite = unittest.TestLoader().loadTestsFromTestCase(TestValidatorUnitHelper)
         unittest.TextTestRunner(verbosity=0).run(suite)

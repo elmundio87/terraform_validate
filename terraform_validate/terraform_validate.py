@@ -62,12 +62,19 @@ class Validator:
                 out[property] = properties[property]
         return out
 
+    def substitute_variable_values_in_string(self, s):
+        for variable in self.list_terraform_variables_in_string(s):
+            s = s.replace('${var.'+variable+'}',self.get_terraform_variable_value(variable))
+        return s
+
+    def list_terraform_variables_in_string(self, s):
+        return re.findall('\${var.(\w+)}',str(s))
+
     def get_terraform_property_value(self, name,values):
         if name not in values:
             return None
         for value in values:
-            if self.is_terraform_variable(values[value]):
-                values[value] = self.get_terraform_variable_value(self.get_terraform_variable_name(values[value]))
+            values[value] = self.substitute_variable_values_in_string(values[value])
         return values[name]
 
     def convert_to_list(self, nested_resources):
