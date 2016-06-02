@@ -63,8 +63,10 @@ class Validator:
         return out
 
     def substitute_variable_values_in_string(self, s):
-        for variable in self.list_terraform_variables_in_string(s):
-            s = s.replace('${var.'+variable+'}',self.get_terraform_variable_value(variable))
+        if not isinstance(s,dict):
+            for variable in self.list_terraform_variables_in_string(s):
+                s = s.replace('${var.'+variable+'}',self.get_terraform_variable_value(variable))
+
         return s
 
     def list_terraform_variables_in_string(self, s):

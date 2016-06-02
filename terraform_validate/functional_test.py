@@ -80,9 +80,13 @@ class TestValidatorFunctional(unittest.TestCase):
     def test_invalid_terraform_syntax(self):
         self.assertRaises(t.TerraformSyntaxException, t.Validator,os.path.join(self.path, "fixtures/invalid_syntax"))
 
-    def test_invalid_terraform_syntax(self):
+    def test_multiple_variable_substitutions(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/multiple_variables"))
         validator.assert_resource_property_value_equals('aws_instance','value',12)
+
+    def test_nested_multiple_variable_substitutions(self):
+        validator = t.Validator(os.path.join(self.path, "fixtures/multiple_variables"))
+        validator.assert_nested_resource_property_value_equals('aws_instance','value_block','value',21)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestValidatorFunctional)

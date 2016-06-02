@@ -8,4 +8,7 @@ variable "test_variable2" {
 
 resource "aws_instance" "foo" {
     value = "${var.test_variable}${var.test_variable2}"
+    value_block = {
+        value = "${var.test_variable2}${var.test_variable}"
+    }
 }
