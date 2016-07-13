@@ -100,8 +100,15 @@ class TestValidatorFunctional(unittest.TestCase):
 
     def test_variable_has_default_value(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/default_variable"))
-        validator.assert_variable_has_default_value('foo')
-        self.assertRaises(AssertionError, validator.assert_variable_has_default_value, 'bar')
+        validator.assert_variable_default_value_exists('foo')
+        self.assertRaises(AssertionError, validator.assert_variable_default_value_exists, 'bar')
+
+    def test_variable_default_value_equals(self):
+        validator = t.Validator(os.path.join(self.path, "fixtures/default_variable"))
+        validator.assert_variable_default_value_equals('foo',1)
+        self.assertRaises(AssertionError, validator.assert_variable_default_value_equals, 'foo',2)
+        validator.assert_variable_default_value_equals('bar', None)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestValidatorFunctional)
