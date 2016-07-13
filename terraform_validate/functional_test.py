@@ -98,6 +98,23 @@ class TestValidatorFunctional(unittest.TestCase):
         validator.assert_resource_name_matches_regex('aws_foo', '^[a-z0-9_]*$')
         self.assertRaises(AssertionError,validator.assert_resource_name_matches_regex,'aws_instance','^[a-z0-9_]*$')
 
+    def test_variable_has_default_value(self):
+        validator = t.Validator(os.path.join(self.path, "fixtures/default_variable"))
+        validator.assert_variable_default_value_exists('foo')
+        self.assertRaises(AssertionError, validator.assert_variable_default_value_exists, 'bar')
+
+    def test_variable_default_value_equals(self):
+        validator = t.Validator(os.path.join(self.path, "fixtures/default_variable"))
+        validator.assert_variable_default_value_equals('foo',1)
+        self.assertRaises(AssertionError, validator.assert_variable_default_value_equals, 'foo',2)
+        validator.assert_variable_default_value_equals('bar', None)
+
+    def test_variable_default_value_matches_regex(self):
+        validator = t.Validator(os.path.join(self.path, "fixtures/default_variable"))
+        validator.assert_variable_default_value_matches_regex('bizz', '^.*')
+        self.assertRaises(AssertionError, validator.assert_variable_default_value_matches_regex, 'bizz', '^123')
+
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestValidatorFunctional)
     unittest.TextTestRunner(verbosity=0).run(suite)

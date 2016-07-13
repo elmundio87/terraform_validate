@@ -90,6 +90,14 @@ class Validator:
             nested_resources = [nested_resources]
         return nested_resources
 
+    def assert_variable_base(self, variable_name, closure):
+        errors = []
+        default_variable_value = self.get_terraform_variable_value(variable_name)
+        error = closure(variable_name, default_variable_value)
+        if error is not None: errors += error
+        if len(errors) > 0:
+            raise AssertionError("\n".join(errors))
+
     def assert_resource_base(self, resource_types, closure):
         errors = []
         resources = {}
@@ -223,6 +231,33 @@ class Validator:
         def closure(resource_type, resource_name, resource):
             return self.resource_regexproperty_value_equals(resource_name, resource, resource_type, regex, property_value)
         self.assert_nested_resource_base(resource_type, nested_resource_name, closure)
+
+    def assert_variable_default_value_exists(self, variable_name):
+        def closure(variable_name, default_variable_value):
+            if default_variable_value == None:
+                return ["Variable {0} should have a default value".format(variable_name)]
+            return []
+        self.assert_variable_base(variable_name, closure)
+
+    def assert_variable_default_value_equals(self, variable_name, variable_value):
+        def closure(variable_name, default_variable_value):
+            if str(default_variable_value) != str(variable_value):
+                return ["Variable {0} should have a default value of {1}. Is: {2}".format(variable_name, variable_value, default_variable_value)]
+            return []
+        self.assert_variable_base(variable_name, closure)
+
+    def assert_variable_default_value_matches_regex(self, variable_name, regex):
+        def closure(variable_name, default_variable_value):
+            if not self.matches_regex_pattern(default_variable_value, regex):
+                return [
+                    "Variable {0} should have a default value that matches regex '{1}'. Is: {2}".format(variable_name, regex, default_variable_value)]
+            return []
+        self.assert_variable_base(variable_name, closure)
+
+
+
+
+
 
 
 
