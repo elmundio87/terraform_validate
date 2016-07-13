@@ -11,8 +11,12 @@ class TerraformVariableException(Exception):
 class Validator:
 
     def __init__(self,path=None):
+        self.variable_expand = True
         if path is not None:
             self.terraform_config = self.parse_terraform_directory(path)
+
+    def disable_variable_expansion(self):
+        self.variable_expand = False
 
     def parse_terraform_directory(self,path):
 
@@ -77,7 +81,8 @@ class Validator:
         if name not in values:
             return None
         for value in values:
-            values[value] = self.substitute_variable_values_in_string(values[value])
+            if self.variable_expand:
+                values[value] = self.substitute_variable_values_in_string(values[value])
         return values[name]
 
     def convert_to_list(self, nested_resources):

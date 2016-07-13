@@ -88,6 +88,11 @@ class TestValidatorFunctional(unittest.TestCase):
         validator = t.Validator(os.path.join(self.path, "fixtures/multiple_variables"))
         validator.assert_nested_resource_property_value_equals('aws_instance','value_block','value',21)
 
+    def test_variable_expansion(self):
+        validator = t.Validator(os.path.join(self.path, "fixtures/variable_expansion"))
+        validator.disable_variable_expansion()
+        validator.assert_resource_property_value_equals('aws_instance','value','${var.bar}')
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestValidatorFunctional)
     unittest.TextTestRunner(verbosity=0).run(suite)
