@@ -109,6 +109,11 @@ class TestValidatorFunctional(unittest.TestCase):
         self.assertRaises(AssertionError, validator.assert_variable_default_value_equals, 'foo',2)
         validator.assert_variable_default_value_equals('bar', None)
 
+    def test_variable_default_value_matches_regex(self):
+        validator = t.Validator(os.path.join(self.path, "fixtures/default_variable"))
+        validator.assert_variable_default_value_matches_regex('bizz', '^.*')
+        self.assertRaises(AssertionError, validator.assert_variable_default_value_matches_regex, 'bizz', '^123')
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestValidatorFunctional)

@@ -5,3 +5,7 @@ variable "foo" {
 variable "bar" {
 
 }
+
+variable "bizz" {
+    default = "abc"
+}
