@@ -194,6 +194,14 @@ class Validator:
             return self.resource_property_value_matches_regex(resource_name, resource, resource_type, property, regex)
         self.assert_nested_resource_base(resource_type, nested_resource_name, closure)
 
+    def assert_resource_name_matches_regex(self, resource_type, regex):
+        def closure(resource_type, resource_name, resource):
+            if not self.matches_regex_pattern(resource_name, regex):
+                return [
+                    "[{0}.{1}] should match regex '{2}'".format(resource_type, resource_name, regex )]
+            return []
+        self.assert_resource_base(resource_type, closure)
+
     def resource_regexproperty_value_equals(self,resource_name,resource,resource_type,regex,property_value):
         properties = self.get_terraform_properties_that_match_regex(regex, resource)
 
@@ -215,6 +223,7 @@ class Validator:
         def closure(resource_type, resource_name, resource):
             return self.resource_regexproperty_value_equals(resource_name, resource, resource_type, regex, property_value)
         self.assert_nested_resource_base(resource_type, nested_resource_name, closure)
+
 
 
 

@@ -93,6 +93,11 @@ class TestValidatorFunctional(unittest.TestCase):
         validator.disable_variable_expansion()
         validator.assert_resource_property_value_equals('aws_instance','value','${var.bar}')
 
+    def test_resource_name_matches_regex(self):
+        validator = t.Validator(os.path.join(self.path, "fixtures/resource_name"))
+        validator.assert_resource_name_matches_regex('aws_foo', '^[a-z0-9_]*$')
+        self.assertRaises(AssertionError,validator.assert_resource_name_matches_regex,'aws_instance','^[a-z0-9_]*$')
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestValidatorFunctional)
     unittest.TextTestRunner(verbosity=0).run(suite)
