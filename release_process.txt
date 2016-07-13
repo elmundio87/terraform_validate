@@ -1,0 +1,4 @@
+1. Push new tag to github
+2. Update version in setup.py to match tag
+3. Update download_url in setup.py to match tag
+4. Run ./release.sh
