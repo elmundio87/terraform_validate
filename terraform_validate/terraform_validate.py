@@ -8,6 +8,47 @@ class TerraformSyntaxException(Exception):
 class TerraformVariableException(Exception):
     pass
 
+class TerraformUnimplementedInterpolationException(Exception):
+    pass
+
+class TerraformVariableParser:
+
+    def __init__(self,string):
+        self.string = string
+        self.functions = []
+        self.variable = ""
+        self.state = 0
+        self.index = 0
+
+    def parse(self):
+        while self.index < len(self.string):
+            if self.state == 0:
+                if self.string[self.index:self.index+3] == "var":
+                    self.index += 3
+                    self.state = 1
+                else:
+                    self.state = 3
+                    temp_function = ""
+            if self.state == 1:
+                temp_var = ""
+                while True:
+                    self.index += 1
+                    if self.index == len(self.string) or self.string[self.index] == ")":
+                        self.variable = temp_var
+                        self.state = 2
+                        break;
+                    else:
+                        temp_var += self.string[self.index]
+            if self.state == 2:
+                self.index += 1
+            if self.state == 3:
+                if self.string[self.index] == "(":
+                    self.state = 0
+                    self.functions.append(temp_function)
+                else:
+                    temp_function += self.string[self.index]
+                self.index += 1
+
 class Validator:
 
     def __init__(self,path=None):
@@ -46,9 +87,6 @@ class Validator:
         p = re.compile(regex)
         return p.match(str(variable))
 
-    def is_terraform_variable(self, variable):
-        return self.matches_regex_pattern(variable,'\${var.(.*)}')
-
     def get_terraform_variable_name(self, s):
         return self.get_regex_matches('\${var.(.*)}', s).group(1)
 
@@ -69,13 +107,22 @@ class Validator:
     def substitute_variable_values_in_string(self, s):
         if not isinstance(s,dict):
             for variable in self.list_terraform_variables_in_string(s):
-                variable_default_value = self.get_terraform_variable_value(variable)
+                a = TerraformVariableParser(variable)
+                a.parse()
+                variable_default_value = self.get_terraform_variable_value(a.variable)
                 if variable_default_value != None:
-                    s = s.replace('${var.'+variable+'}',variable_default_value)
+                    for function in a.functions:
+                        if function == "lower":
+                            variable_default_value = variable_default_value.lower()
+                        elif function == "upper":
+                            variable_default_value = variable_default_value.upper()
+                        else:
+                            raise TerraformUnimplementedInterpolationException("The interpolation function '{0}' has not been implemented in Terraform Validator yet. Suggest you run disable_variable_expansion().".format(function))
+                    s = s.replace("${" + variable + "}",variable_default_value)
         return s
 
     def list_terraform_variables_in_string(self, s):
-        return re.findall('\${var.(\w+)}',str(s))
+        return re.findall('\${(.*?)}',str(s))
 
     def get_terraform_property_value(self, name,values):
         if name not in values:
