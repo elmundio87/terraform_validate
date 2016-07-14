@@ -114,6 +114,9 @@ class TestValidatorFunctional(unittest.TestCase):
         validator.assert_variable_default_value_matches_regex('bizz', '^.*')
         self.assertRaises(AssertionError, validator.assert_variable_default_value_matches_regex, 'bizz', '^123')
 
+    def test_no_exceptions_raised_when_no_resources_present(self):
+        validator = t.Validator(os.path.join(self.path, "fixtures/no_resources"))
+        validator.assert_resource_property_value_equals('aws_instance', 'value', 1)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestValidatorFunctional)

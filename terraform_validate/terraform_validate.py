@@ -105,7 +105,8 @@ class Validator:
         for resource_type in resource_types:
             if resource_type not in resources.keys():
                 resources[resource_type] = []
-            resources[resource_type] += self.get_terraform_resources(resource_type, self.terraform_config['resource'])
+            if 'resource' in self.terraform_config.keys():
+                resources[resource_type] += self.get_terraform_resources(resource_type, self.terraform_config['resource'])
 
         for resource_type in resource_types:
             for resource in resources[resource_type]:
@@ -122,7 +123,8 @@ class Validator:
         for resource_type in resource_types:
             if resource_type not in resources.keys():
                 resources[resource_type] = []
-            resources[resource_type] += self.get_terraform_resources(resource_type, self.terraform_config['resource'])
+            if 'resource' in self.terraform_config.keys():
+                resources[resource_type] += self.get_terraform_resources(resource_type, self.terraform_config['resource'])
 
         for resource_type in resource_types:
             for resource in resources[resource_type]:
