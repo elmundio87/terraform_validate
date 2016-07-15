@@ -33,17 +33,17 @@ class TestValidatorUnitHelper(unittest.TestCase):
     def test_can_find_one_variable_in_string(self):
         v = t.Validator()
         a = v.list_terraform_variables_in_string("${var.abc}")
-        self.assertEqual(a,["abc"])
+        self.assertEqual(a,["var.abc"])
 
     def test_can_find_multiple_variables_in_string(self):
         v = t.Validator()
         a = v.list_terraform_variables_in_string("${var.abc}${var.def}")
-        self.assertEqual(a,["abc","def"])
+        self.assertEqual(a,["var.abc","var.def"])
 
     def test_can_find_multiple_variables_in_complex_string(self):
         v = t.Validator()
         a = v.list_terraform_variables_in_string("a${var.abc}b${var.def}c")
-        self.assertEqual(a,["abc","def"])
+        self.assertEqual(a,["var.abc","var.def"])
 
     def test_handle_finding_variables_in_non_string_object(self):
         v = t.Validator()
@@ -118,6 +118,20 @@ class TestValidatorUnitAssertClosures(unittest.TestCase):
         v = t.Validator()
         a = v.resource_regexproperty_value_equals("foo", {'my_property':2}, 'aws_instance', '^my_', 1)
         self.assertEqual(a, ["[aws_instance.foo.my_property] should be '1'. Is: '2'"])
+
+class TestTerraformVariableParser(unittest.TestCase):
+
+    def test_simple_parse(self):
+        a = t.TerraformVariableParser("var.lol")
+        a.parse()
+        self.assertEqual(a.variable, 'lol')
+
+    def test_function_parse(self):
+        a = t.TerraformVariableParser("lower(upper(var.lol))")
+        a.parse()
+        self.assertEqual(a.variable, 'lol')
+        self.assertEqual(a.functions, ['lower','upper'])
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestValidatorUnitAssertClosures)

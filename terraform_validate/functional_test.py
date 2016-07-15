@@ -118,6 +118,15 @@ class TestValidatorFunctional(unittest.TestCase):
         validator = t.Validator(os.path.join(self.path, "fixtures/no_resources"))
         validator.assert_resource_property_value_equals('aws_instance', 'value', 1)
 
+    def test_lowercase_formatting_in_variable_substitution(self):
+        validator = t.Validator(os.path.join(self.path, "fixtures/lower_format_variable"))
+        validator.assert_resource_property_value_equals('aws_instance', 'value', "abc")
+        validator.assert_resource_property_value_equals('aws_instance2', 'value', "abcDEF")
+
+    def test_parsing_variable_with_unimplemented_interpolation_function(self):
+        validator = t.Validator(os.path.join(self.path, "fixtures/unimplemented_interpolation"))
+        self.assertRaises(t.TerraformUnimplementedInterpolationException,validator.assert_resource_property_value_equals, 'aws_instance', 'value', "abc")
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestValidatorFunctional)
     unittest.TextTestRunner(verbosity=0).run(suite)
