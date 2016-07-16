@@ -49,12 +49,107 @@ class TerraformVariableParser:
                     temp_function += self.string[self.index]
                 self.index += 1
 
+class TerraformVariable:
+
+    def default_value(self):
+        return TerraformProperty()
+
+class TerraformPropertyList:
+
+    def __init__(self, parent):
+        self.properties = []
+
+    def property(self, property_name):
+        list = TerraformPropertyList(self)
+        for property in self.properties:
+            if property_name in property.property_value.keys():
+                list.properties.append(TerraformProperty(property.resource_type,
+                                                     "{0}.{1}".format(property.resource_name,property.property_name),
+                                                     property_name,
+                                                     property.property_value[property_name]))
+        return list
+
+    def equals(self,expected_value):
+        errors = []
+        for property in self.properties:
+            if str(property.property_value) != str(expected_value):
+                errors.append("[{0}.{1}.{2}] should be '{3}'. Is: '{4}'".format(property.resource_type,
+                                                                        property.resource_name,
+                                                                        property.property_name,
+                                                                        expected_value,
+                                                                        property.property_value))
+        if len(errors) > 0:
+            raise AssertionError("\n".join(errors))
+
+    def not_equals(self,expected_value):
+        errors = []
+        for property in self.properties:
+            if str(property.property_value) == str(expected_value):
+                errors.append("[{0}.{1}.{2}] should not be '{3}'. Is: '{4}'".format(property.resource_type,
+                                                                        property.resource_name,
+                                                                        property.property_name,
+                                                                        expected_value,
+                                                                        property.property_value))
+        if len(errors) > 0:
+            raise AssertionError("\n".join(errors))
+
+    def has_properties(self,required_properties):
+        errors = []
+        property_names = self.properties.keys()
+        for required_property_name in required_properties:
+            if not required_property_name in property_names:
+                errors += ["[{0}.{1}] should have property: '{2}'".format(property.resource_type, property.resource_name,
+                                                                          required_property_name)]
+        if len(errors) > 0:
+            raise AssertionError("\n".join(errors))
+
+    def matches_regex(self,regex):
+        return False
+
+class TerraformProperty:
+
+    def __init__(self,resource_type,resource_name,property_name,property_value):
+        self.resource_type = resource_type
+        self.resource_name = resource_name
+        self.property_name = property_name
+        self.property_value = property_value
+
+class TerraformResourceList:
+
+    def __init__(self, parent, resource_type, resources):
+        self.resource_list = resources
+        self.resource_type = resource_type
+        self.parent = parent
+
+    # def resources(self, name):
+    #     return TerraformResourceList(self,"{0}.{1}".format(self.resource_type,name),self.get_terraform_resources(name,self.resource_list[0]))
+
+    def property(self, property_name):
+        list = TerraformPropertyList(self)
+        for resource_name in self.resource_list[0]:
+            list.properties.append(TerraformProperty(self.resource_type,resource_name,property_name,self.resource_list[0][resource_name][property_name]))
+        return list
+
+    def has_properties(self, properties):
+        return False
+
+class TerraformResource:
+
+    def __init_(self):
+        return
+
 class Validator:
+
+    def resources(self, type):
+        return TerraformResourceList(None,type,self.get_terraform_resources(type,self.terraform_config['resource']))
 
     def __init__(self,path=None):
         self.variable_expand = True
-        if path is not None:
-            self.terraform_config = self.parse_terraform_directory(path)
+        if type(path) is not dict:
+            if path is not None:
+                self.terraform_config = self.parse_terraform_directory(path)
+        else:
+            self.terraform_config = path
 
     def disable_variable_expansion(self):
         self.variable_expand = False
