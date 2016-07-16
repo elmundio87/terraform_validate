@@ -95,11 +95,13 @@ class TerraformPropertyList:
 
     def has_properties(self,required_properties):
         errors = []
-        property_names = self.properties.keys()
-        for required_property_name in required_properties:
-            if not required_property_name in property_names:
-                errors += ["[{0}.{1}] should have property: '{2}'".format(property.resource_type, property.resource_name,
-                                                                          required_property_name)]
+
+        for property in self.properties:
+            property_names = property.property_value.keys()
+            for required_property_name in required_properties:
+                if not required_property_name in property_names:
+                    errors.append(["[{0}.{1}] should have property: '{2}'".format(property.resource_type, property.resource_name,
+                                                                              required_property_name)])
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))
 
