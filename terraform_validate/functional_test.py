@@ -66,9 +66,10 @@ class TestValidatorFunctional(unittest.TestCase):
 
         self.assertRaises(t.TerraformVariableException, validator.resources('aws_instance').property('value').equals,1)
 
-    #def test_missing_required_nested_resource_fails(self):
-    #    validator = t.Validator(os.path.join(self.path, "fixtures/resource"))
-    #    self.assertRaises(AssertionError,validator.assert_nested_resource_property_value_equals,'aws_instance', 'tags', 'encrypted', 1)
+    def test_missing_required_nested_resource_fails(self):
+        validator = t.Validator(os.path.join(self.path, "fixtures/resource"))
+        self.assertRaises(AssertionError,validator.assert_nested_resource_property_value_equals,'aws_instance', 'tags', 'encrypted', 1)
+        self.assertRaises(AssertionError,validator.resources('aws_instance').property('tags').property('encrypted').equals(1))
 
     def test_properties_on_nonexistant_resource_type(self):
         required_properties = ['value', 'value2']
