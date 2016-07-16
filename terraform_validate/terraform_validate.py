@@ -128,8 +128,10 @@ class TerraformResourceList:
 
     def property(self, property_name):
         list = TerraformPropertyList(self)
-        for resource_name in self.resource_list[0]:
-            list.properties.append(TerraformProperty(self.resource_type,resource_name,property_name,self.resource_list[0][resource_name][property_name]))
+        if len(self.resource_list) > 0:
+            for resource_name in self.resource_list[0]:
+                list.properties.append(TerraformProperty(self.resource_type,resource_name,property_name,self.resource_list[0][resource_name][property_name]))
+
         return list
 
     def has_properties(self, properties):
@@ -143,7 +145,12 @@ class TerraformResource:
 class Validator:
 
     def resources(self, type):
-        return TerraformResourceList(None,type,self.get_terraform_resources(type,self.terraform_config['resource']))
+        if 'resource' not in self.terraform_config.keys():
+            resources = {}
+        else:
+            resources = self.terraform_config['resource']
+
+        return TerraformResourceList(None,type,self.get_terraform_resources(type,resources))
 
     def __init__(self,path=None):
         self.variable_expand = True
