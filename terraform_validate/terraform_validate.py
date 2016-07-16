@@ -130,7 +130,8 @@ class TerraformResourceList:
         list = TerraformPropertyList(self)
         if len(self.resource_list) > 0:
             for resource_name in self.resource_list[0]:
-                list.properties.append(TerraformProperty(self.resource_type,resource_name,property_name,self.resource_list[0][resource_name][property_name]))
+                if property_name in self.resource_list[0][resource_name].keys():
+                    list.properties.append(TerraformProperty(self.resource_type,resource_name,property_name,self.resource_list[0][resource_name][property_name]))
 
         return list
 

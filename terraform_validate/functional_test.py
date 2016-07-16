@@ -74,7 +74,7 @@ class TestValidatorFunctional(unittest.TestCase):
         required_properties = ['value', 'value2']
         validator = t.Validator(os.path.join(self.path, "fixtures/missing_variable"))
         validator.assert_nested_resource_has_properties('aws_rds_instance', 'nested_resource', required_properties)
-        validator.resources('aws_instance').property('nested_resource').has_properties(required_properties)
+        validator.resources('aws_rds_instance').property('nested_resource').has_properties(required_properties)
 
     def test_searching_for_property_value_using_regex(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/regex_variables"))
