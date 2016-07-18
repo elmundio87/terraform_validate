@@ -76,12 +76,12 @@ class TestValidatorFunctional(unittest.TestCase):
     def test_searching_for_property_value_using_regex(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/regex_variables"))
         validator.assert_resource_regexproperty_value_equals('aws_instance', '^CPM_Service_[A-Za-z]+$', 1)
-        validator.resources('aws_instance').regex_property('^CPM_Service_[A-Za-z]+$').equals(1)
+        validator.resources('aws_instance').find_property('^CPM_Service_[A-Za-z]+$').equals(1)
 
     def test_searching_for_nested_property_value_using_regex(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/regex_nested_variables"))
         validator.assert_nested_resource_regexproperty_value_equals('aws_instance', 'tags', '^CPM_Service_[A-Za-z]+$', 1)
-        validator.resources('aws_instance').property('tags').regex_property('^CPM_Service_[A-Za-z]+$').equals(1)
+        validator.resources('aws_instance').property('tags').find_property('^CPM_Service_[A-Za-z]+$').equals(1)
 
     def test_resource_type_list(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/resource"))

@@ -108,8 +108,18 @@ class TerraformPropertyList:
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))
 
-    def matches_regex(self,regex):
+    def find_property(self,regex):
         return False
+
+    def matches_regex(self,regex):
+        errors = []
+        for property in self.properties:
+            actual_property_value = self.validator.substitute_variable_values_in_string(property.property_value)
+            if not self.validator.matches_regex_pattern(actual_property_value, regex):
+                errors.append("[{0}.{1}] should match regex '{2}'".format(self.resource_type, resource, regex))
+
+        if len(errors) > 0:
+            raise AssertionError("\n".join(errors))
 
 class TerraformProperty:
 
