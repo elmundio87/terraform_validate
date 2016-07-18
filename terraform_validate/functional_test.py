@@ -48,12 +48,6 @@ class TestValidatorFunctional(unittest.TestCase):
         validator.assert_nested_resource_property_value_matches_regex('aws_instance','nested_resource',"value",'[0-9]')
         validator.resources('aws_instance').property('nested_resource').property('value').matches_regex('[0-9]')
 
-
-    def test_nonexistant_nested_resource_property_value_matches_regex_fails(self):
-        validator = t.Validator(os.path.join(self.path, "fixtures/nested_resource"))
-        self.assertRaises(AssertionError,validator.assert_nested_resource_property_value_matches_regex,'aws_instance', 'nested_resource', "value3", '[0-9]')
-        self.assertRaises(AssertionError, validator.resources('aws_instance').property('nested_resource').property('value3').matches_regex, '[0-9]' )
-
     def test_variable_substitution(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/variable_substitution"))
         validator.enable_variable_expansion()
