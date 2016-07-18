@@ -61,7 +61,7 @@ class TerraformPropertyList:
         self.validator = validator
 
     def property(self, property_name):
-        list = TerraformPropertyList(self)
+        list = TerraformPropertyList(self.validator)
         for property in self.properties:
             if property_name in property.property_value.keys():
                 list.properties.append(TerraformProperty(property.resource_type,
@@ -73,24 +73,26 @@ class TerraformPropertyList:
     def equals(self,expected_value):
         errors = []
         for property in self.properties:
-            if str(property.property_value) != str(expected_value):
+            actual_property_value = self.validator.substitute_variable_values_in_string(property.property_value)
+            if str(actual_property_value) != str(expected_value):
                 errors.append("[{0}.{1}.{2}] should be '{3}'. Is: '{4}'".format(property.resource_type,
                                                                         property.resource_name,
                                                                         property.property_name,
                                                                         expected_value,
-                                                                        property.property_value))
+                                                                        actual_property_value))
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))
 
     def not_equals(self,expected_value):
         errors = []
         for property in self.properties:
-            if str(property.property_value) == str(expected_value):
+            actual_property_value = self.validator.substitute_variable_values_in_string(property.property_value)
+            if str(actual_property_value) == str(expected_value):
                 errors.append("[{0}.{1}.{2}] should not be '{3}'. Is: '{4}'".format(property.resource_type,
                                                                         property.resource_name,
                                                                         property.property_name,
                                                                         expected_value,
-                                                                        property.property_value))
+                                                                        actual_property_value))
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))
 
@@ -128,7 +130,7 @@ class TerraformResourceList:
     #     return TerraformResourceList(self,"{0}.{1}".format(self.resource_type,name),self.get_terraform_resources(name,self.resource_list[0]))
 
     def property(self, property_name):
-        list = TerraformPropertyList(self)
+        list = TerraformPropertyList(self.validator)
         if len(self.resource_list) > 0:
             for resource_name in self.resource_list[0]:
                 if property_name in self.resource_list[0][resource_name].keys():
@@ -156,7 +158,7 @@ class TerraformResource:
 class Validator:
 
     def __init__(self,path=None):
-        self.variable_expand = True
+        self.variable_expand = False
         if type(path) is not dict:
             if path is not None:
                 self.terraform_config = self.parse_terraform_directory(path)
@@ -171,8 +173,8 @@ class Validator:
 
         return TerraformResourceList(self, type, self.get_terraform_resources(type, resources))
 
-    def disable_variable_expansion(self):
-        self.variable_expand = False
+    def enable_variable_expansion(self):
+        self.variable_expand = True
 
     def parse_terraform_directory(self,path):
 
@@ -220,20 +222,21 @@ class Validator:
         return out
 
     def substitute_variable_values_in_string(self, s):
-        if not isinstance(s,dict):
-            for variable in self.list_terraform_variables_in_string(s):
-                a = TerraformVariableParser(variable)
-                a.parse()
-                variable_default_value = self.get_terraform_variable_value(a.variable)
-                if variable_default_value != None:
-                    for function in a.functions:
-                        if function == "lower":
-                            variable_default_value = variable_default_value.lower()
-                        elif function == "upper":
-                            variable_default_value = variable_default_value.upper()
-                        else:
-                            raise TerraformUnimplementedInterpolationException("The interpolation function '{0}' has not been implemented in Terraform Validator yet. Suggest you run disable_variable_expansion().".format(function))
-                    s = s.replace("${" + variable + "}",variable_default_value)
+        if self.variable_expand:
+            if not isinstance(s,dict):
+                for variable in self.list_terraform_variables_in_string(s):
+                    a = TerraformVariableParser(variable)
+                    a.parse()
+                    variable_default_value = self.get_terraform_variable_value(a.variable)
+                    if variable_default_value != None:
+                        for function in a.functions:
+                            if function == "lower":
+                                variable_default_value = variable_default_value.lower()
+                            elif function == "upper":
+                                variable_default_value = variable_default_value.upper()
+                            else:
+                                raise TerraformUnimplementedInterpolationException("The interpolation function '{0}' has not been implemented in Terraform Validator yet. Suggest you run disable_variable_expansion().".format(function))
+                        s = s.replace("${" + variable + "}",variable_default_value)
         return s
 
     def list_terraform_variables_in_string(self, s):
