@@ -189,6 +189,39 @@ class TerraformResourceList:
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))
 
+class TerraformVariable:
+
+    def __init__(self,validator,name,value):
+        self.validator = validator
+        self.name = name
+        self.value = value
+
+    def default_value_exists(self):
+        errors = []
+        if self.value == None:
+            errors.append("Variable {0} should have a default value".format(self.name))
+
+        if len(errors) > 0:
+            raise AssertionError("\n".join(errors))
+
+    def default_value_equals(self,expected_value):
+        errors = []
+
+        if self.value != expected_value:
+            errors.append("Variable {0} should have a default value of {1}. Is: {2}".format(self.name,
+                                                                                            expected_value,
+                                                                                            self.value))
+        if len(errors) > 0:
+            raise AssertionError("\n".join(errors))
+
+    def default_value_matches_regex(self,regex):
+        errors = []
+        if not self.validator.matches_regex_pattern(self.value, regex):
+            errors.append("Variable {0} should have a default value that matches regex '{1}'. Is: {2}".format(self.name,regex,self.value))
+
+        if len(errors) > 0:
+            raise AssertionError("\n".join(errors))
+
 class Validator:
 
     def __init__(self,path=None):
@@ -206,6 +239,9 @@ class Validator:
             resources = self.terraform_config['resource']
 
         return TerraformResourceList(self, type, self.get_terraform_resources(type, resources))
+
+    def variable(self, name):
+        return TerraformVariable(self, name, self.get_terraform_variable_value(name))
 
     def enable_variable_expansion(self):
         self.variable_expand = True

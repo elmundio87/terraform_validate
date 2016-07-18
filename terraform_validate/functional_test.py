@@ -161,6 +161,23 @@ class TestValidatorFunctional(unittest.TestCase):
         self.assertRaises(t.TerraformUnimplementedInterpolationException,validator.assert_resource_property_value_equals, 'aws_instance', 'value', "abc")
         self.assertRaises(t.TerraformUnimplementedInterpolationException, validator.resources('aws_instance').property('value').equals,'abc')
 
+    def test_encryption_scenario(self):
+        validator = t.Validator(os.path.join(self.path, "fixtures/enforce_encrypted"))
+
+        validator.resources("aws_db_instance_valid").property("storage_encrypted").equals("True")
+        self.assertRaises(AssertionError, validator.resources("aws_db_instance_invalid2").property("storage_encrypted").exists())
+        self.assertRaises(AssertionError, validator.resources("aws_db_instance_invalid").property("storage_encrypted").equals, "True")
+        self.assertRaises(AssertionError, validator.resources("aws_db_instance_invalid2").property("storage_encrypted").equals, "True")
+
+        validator.resources("aws_instance_valid").property('ebs_block_device').property("encrypted").equals("True")
+        self.assertRaises(AssertionError, validator.resources("aws_instance_invalid").property('ebs_block_device').property("encrypted").equals, "True")
+        self.assertRaises(AssertionError, validator.resources("aws_instance_invalid2").property('ebs_block_device').property("encrypted").equals, "True")
+
+        validator.resources("aws_ebs_volume_valid").property("encrypted").equals("True")
+        self.assertRaises(AssertionError, validator.resources("aws_ebs_volume_invalid").property("encrypted").equals, "True")
+        self.assertRaises(AssertionError, validator.resources("aws_ebs_volume_invalid2").property("encrypted").equals, "True")
+
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestValidatorFunctional)
     unittest.TextTestRunner(verbosity=0).run(suite)
