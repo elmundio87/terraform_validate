@@ -56,8 +56,9 @@ class TerraformVariable:
 
 class TerraformPropertyList:
 
-    def __init__(self, parent):
+    def __init__(self, validator):
         self.properties = []
+        self.validator = validator
 
     def property(self, property_name):
         list = TerraformPropertyList(self)
@@ -118,10 +119,10 @@ class TerraformProperty:
 
 class TerraformResourceList:
 
-    def __init__(self, parent, resource_type, resources):
+    def __init__(self, validator, resource_type, resources):
         self.resource_list = resources
         self.resource_type = resource_type
-        self.parent = parent
+        self.validator = validator
 
     # def resources(self, name):
     #     return TerraformResourceList(self,"{0}.{1}".format(self.resource_type,name),self.get_terraform_resources(name,self.resource_list[0]))
@@ -138,20 +139,21 @@ class TerraformResourceList:
     def has_properties(self, properties):
         return False
 
+    def name_matches_regex(self,regex):
+        errors = []
+        for resource in self.resource_list[0]:
+            if not self.validator.matches_regex_pattern(resource, regex):
+                errors.append("[{0}.{1}] should match regex '{2}'".format(self.resource_type, resource, regex))
+
+        if len(errors) > 0:
+            raise AssertionError("\n".join(errors))
+
 class TerraformResource:
 
     def __init_(self):
         return
 
 class Validator:
-
-    def resources(self, type):
-        if 'resource' not in self.terraform_config.keys():
-            resources = {}
-        else:
-            resources = self.terraform_config['resource']
-
-        return TerraformResourceList(None,type,self.get_terraform_resources(type,resources))
 
     def __init__(self,path=None):
         self.variable_expand = True
@@ -160,6 +162,14 @@ class Validator:
                 self.terraform_config = self.parse_terraform_directory(path)
         else:
             self.terraform_config = path
+
+    def resources(self, type):
+        if 'resource' not in self.terraform_config.keys():
+            resources = {}
+        else:
+            resources = self.terraform_config['resource']
+
+        return TerraformResourceList(self, type, self.get_terraform_resources(type, resources))
 
     def disable_variable_expansion(self):
         self.variable_expand = False
