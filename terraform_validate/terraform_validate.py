@@ -102,14 +102,21 @@ class TerraformPropertyList:
         for property in self.properties:
             property_names = property.property_value.keys()
             for required_property_name in required_properties:
-                if not required_property_name in property_names:
+                if required_property_name not in property_names:
                     errors.append(["[{0}.{1}] should have property: '{2}'".format(property.resource_type, property.resource_name,
                                                                               required_property_name)])
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))
 
     def find_property(self,regex):
-        return False
+        list = TerraformPropertyList(self.validator)
+        for property in self.properties:
+            if self.validator.matches_regex_pattern(property, regex):
+                list.properties.append(TerraformProperty(property.resource_type,
+                                                     "{0}.{1}".format(property.resource_name,property.property_name),
+                                                     property_name,
+                                                     property.property_value[property_name]))
+        return list
 
     def matches_regex(self,regex):
         errors = []
@@ -136,9 +143,6 @@ class TerraformResourceList:
         self.resource_type = resource_type
         self.validator = validator
 
-    # def resources(self, name):
-    #     return TerraformResourceList(self,"{0}.{1}".format(self.resource_type,name),self.get_terraform_resources(name,self.resource_list[0]))
-
     def property(self, property_name):
         list = TerraformPropertyList(self.validator)
         if len(self.resource_list) > 0:
@@ -148,8 +152,33 @@ class TerraformResourceList:
 
         return list
 
-    def has_properties(self, properties):
-        return False
+    def find_property(self, regex):
+        list = TerraformPropertyList(self.validator)
+        if len(self.resource_list) > 0:
+            for resource_name in self.resource_list[0]:
+                for property in self.resource_list[0][resource_name]:
+                    if self.validator.matches_regex_pattern(property, regex):
+                        list.properties.append(TerraformProperty(self.resource_type,
+                                                             resource_name,
+                                                             property,
+                                                                 self.resource_list[0][resource_name][property]))
+        return list
+
+    def has_properties(self, required_properties):
+        errors = []
+
+        if len(self.resource_list) > 0:
+            for resource_name in self.resource_list[0]:
+                for property in self.resource_list[0][resource_name]:
+                    property_names = self.resource_list[0][resource_name].keys()
+                    for required_property_name in required_properties:
+                        if required_property_name not in property_names:
+                            errors.append(
+                                ["[{0}.{1}] should have property: '{2}'".format(property.resource_type, property.resource_name,
+                                                                                required_property_name)])
+        if len(errors) > 0:
+            raise AssertionError("\n".join(errors))
+
 
     def name_matches_regex(self,regex):
         errors = []
@@ -159,11 +188,6 @@ class TerraformResourceList:
 
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))
-
-class TerraformResource:
-
-    def __init_(self):
-        return
 
 class Validator:
 
