@@ -120,6 +120,7 @@ class TestValidatorFunctional(unittest.TestCase):
         validator = t.Validator(os.path.join(self.path, "fixtures/resource_name"))
         validator.assert_resource_name_matches_regex('aws_foo', '^[a-z0-9_]*$')
         self.assertRaises(AssertionError,validator.assert_resource_name_matches_regex,'aws_instance','^[a-z0-9_]*$')
+        validator.resources('aws_foo').name_matches_regex('^[a-z0-9_]*$')
         self.assertRaises(AssertionError,validator.resources('aws_instance').name_matches_regex,'^[a-z0-9_]*$')
 
     def test_variable_has_default_value(self):
