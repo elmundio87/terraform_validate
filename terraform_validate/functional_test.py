@@ -106,6 +106,7 @@ class TestValidatorFunctional(unittest.TestCase):
         validator = t.Validator(os.path.join(self.path, "fixtures/nested_resource"))
         validator.assert_nested_resource_property_value_equals(['aws_instance','aws_elb'],'tags', 'value', 1)
         validator.resources(['aws_instance', 'aws_elb']).property('tags').property('value').equals(1)
+        validator.resources(['aws_instance', 'aws_elb']).property('tags').property('value')
         self.assertRaises(AssertionError,validator.resources(['aws_instance', 'aws_elb']).property('tags').property('value').equals,2)
 
     def test_invalid_terraform_syntax(self):
