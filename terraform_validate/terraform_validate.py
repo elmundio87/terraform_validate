@@ -61,6 +61,7 @@ class TerraformPropertyList:
         self.validator = validator
 
     def property(self, property_name):
+        errors = []
         list = TerraformPropertyList(self.validator)
         for property in self.properties:
             if property_name in property.property_value.keys():
@@ -68,6 +69,12 @@ class TerraformPropertyList:
                                                      "{0}.{1}".format(property.resource_name,property.property_name),
                                                      property_name,
                                                      property.property_value[property_name]))
+            elif self.validator.raise_error_if_property_missing:
+                errors.append("[{0}.{1}] should have property: '{2}'".format(property.resource_type, "{0}.{1}".format(property.resource_name,property.property_name), property_name))
+
+        if len(errors) > 0:
+            raise AssertionError("\n".join(errors))
+
         return list
 
     def equals(self,expected_value):
@@ -163,14 +170,17 @@ class TerraformResourceList:
         self.validator = validator
 
     def property(self, property_name):
-        error = []
+        errors = []
         list = TerraformPropertyList(self.validator)
         if len(self.resource_list) > 0:
             for resource in self.resource_list:
                 if property_name in resource.config.keys():
                     list.properties.append(TerraformProperty(resource.type,resource,property_name,resource.config[property_name]))
                 elif self.validator.raise_error_if_property_missing:
-                    error.append("[{0}.{1}] should have property: '{2}".format(self.resource_type,resource,property_name))
+                    errors.append("[{0}.{1}] should have property: '{2}".format(self.resource_type,resource.name,property_name))
+
+        if len(errors) > 0:
+            raise AssertionError("\n".join(errors))
 
         return list
 
