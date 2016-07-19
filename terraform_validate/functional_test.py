@@ -96,6 +96,7 @@ class TestValidatorFunctional(unittest.TestCase):
         validator.resources('aws_instance').property('tags').find_property('^CPM_Service_[A-Za-z]+$').equals(1)
         self.assertRaises(AssertionError,validator.resources('aws_instance').property('tags').find_property('^CPM_Service_[A-Za-z]+$').equals,2)
 
+
     def test_resource_type_list(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/resource"))
         validator.assert_resource_property_value_equals(['aws_instance','aws_elb'], 'value', 1)

@@ -112,11 +112,12 @@ class TerraformPropertyList:
     def find_property(self,regex):
         list = TerraformPropertyList(self.validator)
         for property in self.properties:
-            if self.validator.matches_regex_pattern(property, regex):
-                list.properties.append(TerraformProperty(property.resource_type,
-                                                     "{0}.{1}".format(property.resource_name,property.property_name),
-                                                     property_name,
-                                                     property.property_value[property_name]))
+            for nested_property in property.property_value:
+                if self.validator.matches_regex_pattern(nested_property, regex):
+                    list.properties.append(TerraformProperty(property.resource_type,
+                                                        "{0}.{1}".format(property.resource_name,property.property_name),
+                                                        nested_property,
+                                                        property.property_value[nested_property]))
         return list
 
     def matches_regex(self,regex):
@@ -177,12 +178,12 @@ class TerraformResourceList:
         list = TerraformPropertyList(self.validator)
         if len(self.resource_list) > 0:
             for resource in self.resource_list:
-                for property in self.resource_list[resource]:
+                for property in resource.config:
                     if self.validator.matches_regex_pattern(property, regex):
                         list.properties.append(TerraformProperty(resource.type,
                                                              resource,
                                                              property,
-                                                                 self.resource_list[resource][property]))
+                                                             resource.config[property]))
         return list
 
     def has_properties(self, required_properties):
