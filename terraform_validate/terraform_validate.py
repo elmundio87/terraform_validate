@@ -96,8 +96,15 @@ class TerraformPropertyList:
         errors = []
         for property in self.properties:
 
-            actual_property_value = str(self.validator.substitute_variable_values_in_string(property.property_value)).encode("ascii")
-            if str(actual_property_value) != str(expected_value):
+            actual_property_value = self.validator.substitute_variable_values_in_string(property.property_value)
+
+            if type(expected_value) is int:
+                expected_value = str(expected_value)
+
+            if type(actual_property_value) is int:
+                actual_property_value = str(actual_property_value)
+
+            if actual_property_value != expected_value:
                 errors.append("[{0}.{1}.{2}] should be '{3}'. Is: '{4}'".format(property.resource_type,
                                                                         property.resource_name,
                                                                         property.property_name,
@@ -109,8 +116,16 @@ class TerraformPropertyList:
     def not_equals(self,expected_value):
         errors = []
         for property in self.properties:
-            actual_property_value = str(self.validator.substitute_variable_values_in_string(property.property_value)).encode("ascii")
-            if str(actual_property_value) == str(expected_value):
+
+            actual_property_value = self.validator.substitute_variable_values_in_string(property.property_value)
+
+            if type(expected_value) is int:
+                expected_value = str(expected_value)
+
+            if type(actual_property_value) is int:
+                actual_property_value = str(actual_property_value)
+
+            if actual_property_value == expected_value:
                 errors.append("[{0}.{1}.{2}] should not be '{3}'. Is: '{4}'".format(property.resource_type,
                                                                         property.resource_name,
                                                                         property.property_name,
