@@ -1,6 +1,7 @@
 import hcl
 import os
 import re
+import inspect
 
 class TerraformSyntaxException(Exception):
     pass
@@ -418,11 +419,13 @@ class Validator:
     def assert_resource_property_value_equals(self,resource_type,property,property_value):
         def closure(resource_type, resource_name, resource):
             return self.resource_property_value_equals(resource_name, resource, resource_type, property, property_value)
+        self.deprecated(inspect.stack()[0][3])
         self.assert_resource_base(resource_type, closure)
 
     def assert_nested_resource_property_value_equals(self, resource_type, nested_resource_name, property, property_value):
         def closure(resource_type, resource_name, resource):
             return self.resource_property_value_equals(resource_name, resource, resource_type, property, property_value)
+        self.deprecated(inspect.stack()[0][3])
         self.assert_nested_resource_base(resource_type, nested_resource_name, closure)
 
     def resource_property_value_not_equals(self, resource_name, resource, resource_type, property, property_value):
@@ -434,11 +437,13 @@ class Validator:
     def assert_resource_property_value_not_equals(self, resource_type, property, property_value):
         def closure(resource_type, resource_name, resource):
             return self.resource_property_value_not_equals(resource_name, resource, resource_type, property, property_value)
+        self.deprecated(inspect.stack()[0][3])
         self.assert_resource_base(resource_type, closure)
 
     def assert_nested_resource_property_value_not_equals(self, resource_type, nested_resource_name, property, property_value):
         def closure(resource_type, resource_name, resource):
             return self.resource_property_value_not_equals(resource_name, resource, resource_type, property, property_value)
+        self.deprecated(inspect.stack()[0][3])
         self.assert_nested_resource_base(resource_type, nested_resource_name, closure)
 
     def resource_has_properties(self,resource_name,resource,resource_type,required_properties):
@@ -452,11 +457,13 @@ class Validator:
     def assert_resource_has_properties(self,resource_type,required_properties):
         def closure(resource_type, resource_name,resource):
             return self.resource_has_properties(resource_name,resource,resource_type,required_properties)
+        self.deprecated(inspect.stack()[0][3])
         self.assert_resource_base(resource_type, closure)
 
     def assert_nested_resource_has_properties(self, resource_type, nested_resource_name, required_properties):
         def closure(resource_type, resource_name, resource):
             return self.resource_has_properties(resource_name, resource, resource_type, required_properties)
+        self.deprecated(inspect.stack()[0][3])
         self.assert_nested_resource_base(resource_type, nested_resource_name, closure)
 
     def resource_property_value_matches_regex(self,resource_name,resource,resource_type,property,regex):
@@ -468,11 +475,13 @@ class Validator:
     def assert_resource_property_value_matches_regex(self, resource_type, property, regex):
         def closure(resource_type, resource_name,resource):
             return self.resource_property_value_matches_regex(resource_name, resource, resource_type, property, regex)
+        self.deprecated(inspect.stack()[0][3])
         self.assert_resource_base(resource_type, closure)
 
     def assert_nested_resource_property_value_matches_regex(self, resource_type, nested_resource_name, property, regex):
         def closure(resource_type, resource_name, resource):
             return self.resource_property_value_matches_regex(resource_name, resource, resource_type, property, regex)
+        self.deprecated(inspect.stack()[0][3])
         self.assert_nested_resource_base(resource_type, nested_resource_name, closure)
 
     def assert_resource_name_matches_regex(self, resource_type, regex):
@@ -481,6 +490,7 @@ class Validator:
                 return [
                     "[{0}.{1}] should match regex '{2}'".format(resource_type, resource_name, regex )]
             return []
+        self.deprecated(inspect.stack()[0][3])
         self.assert_resource_base(resource_type, closure)
 
     def resource_regexproperty_value_equals(self,resource_name,resource,resource_type,regex,property_value):
@@ -498,11 +508,13 @@ class Validator:
     def assert_resource_regexproperty_value_equals(self, resource_type, regex, property_value):
         def closure(resource_type, resource_name,resource):
             return self.resource_regexproperty_value_equals(resource_name,resource,resource_type,regex,property_value)
+        self.deprecated(inspect.stack()[0][3])
         self.assert_resource_base(resource_type, closure)
 
     def assert_nested_resource_regexproperty_value_equals(self, resource_type, nested_resource_name, regex, property_value):
         def closure(resource_type, resource_name, resource):
             return self.resource_regexproperty_value_equals(resource_name, resource, resource_type, regex, property_value)
+        self.deprecated(inspect.stack()[0][3])
         self.assert_nested_resource_base(resource_type, nested_resource_name, closure)
 
     def assert_variable_default_value_exists(self, variable_name):
@@ -510,6 +522,7 @@ class Validator:
             if default_variable_value == None:
                 return ["Variable {0} should have a default value".format(variable_name)]
             return []
+        self.deprecated(inspect.stack()[0][3])
         self.assert_variable_base(variable_name, closure)
 
     def assert_variable_default_value_equals(self, variable_name, variable_value):
@@ -517,6 +530,7 @@ class Validator:
             if str(default_variable_value) != str(variable_value):
                 return ["Variable {0} should have a default value of {1}. Is: {2}".format(variable_name, variable_value, default_variable_value)]
             return []
+        self.deprecated(inspect.stack()[0][3])
         self.assert_variable_base(variable_name, closure)
 
     def assert_variable_default_value_matches_regex(self, variable_name, regex):
@@ -525,9 +539,12 @@ class Validator:
                 return [
                     "Variable {0} should have a default value that matches regex '{1}'. Is: {2}".format(variable_name, regex, default_variable_value)]
             return []
+        self.deprecated(inspect.stack()[0][3])
         self.assert_variable_base(variable_name, closure)
 
-
+    def deprecated(self,function_name):
+        print "The method '{0}' is deprecated as of v2.0. Please refer to the readme for the recommended usage of this library.".format(function_name)
+        print "'{0}' will be removed in a future release.".format(function_name)
 
 
 
