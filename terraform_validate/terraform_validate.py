@@ -10,8 +10,6 @@ def deprecated(func):
     def new_func(*args, **kwargs):
         print "The method '{0}' is deprecated as of v2.0. Please refer to the readme for the recommended usage of this library.".format(func.__name__)
         print "'{0}' will be removed in a future release.".format(func.__name__)
-        warnings.warn("Call to deprecated function {}.".format(func.__name__),
-                      category=DeprecationWarning)
         return func(*args, **kwargs)
     new_func.__name__ = func.__name__
     new_func.__doc__ = func.__doc__
