@@ -116,7 +116,7 @@ class TestValidatorFunctional(unittest.TestCase):
         validator.enable_variable_expansion()
         validator.assert_resource_property_value_equals('aws_instance','value',12)
         validator.resources('aws_instance').property('value').equals(12)
-        self.assertRaises(AssertionError,validator.resources('aws_instance').property('value').equals(21))
+        self.assertRaises(AssertionError,validator.resources('aws_instance').property('value').equals,21)
 
     def test_nested_multiple_variable_substitutions(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/multiple_variables"))
