@@ -4,7 +4,7 @@
 
 A python package that assists in the enforcement of user-defined standards in Terraform.
 
-The validator uses `pyhcl` to parse Terraform configuration files, then tests the state of the config using custom Asserts.
+The validator uses `pyhcl` to parse Terraform configuration files, then tests the state of the config using custom Assert functions.
 
 ## Example Usages
 
@@ -23,11 +23,13 @@ class TestEncryptionAtRest(unittest.TestCase):
 
     def test_aws_ebs_volume(self):
         # Assert that all resources of type 'aws_ebs_volume' are encrypted
-        self.v.assert_resource_property_value_equals('aws_ebs_volume','encrypted',True)
+        self.v.error_if_property_missing() #Fail any tests if the property does not exist
+        self.v.resources('aws_ebs_volume').property('encrypted').equals(True)
 
     def test_instance_ebs_block_device(self):
         # Assert that all resources of type 'ebs_block_device' that are inside a 'aws_instance' are encrypted
-        self.v.assert_nested_resource_property_value_equals('aws_instance','ebs_block_device','encrypted',True)
+        self.v.error_if_property_missing()
+        self.v.resources('aws_instance').property('ebs_block_device').property('encrypted').equals(True)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestEncryptionAtRest)
@@ -49,41 +51,84 @@ resource "aws_ebs_volume" "bar" {
 }
 ```
 
-## Assertions
+## Behaviour functions
 
-All Asserts accept `resource_type` as a list or a string
+These affect the results of the Validation functions in a way that may be required for your tests.
 
-eg.
+### Validator.error_if_property_missing()
 
-```
-# Pass in a string
-assert_resource_property_value_equals('aws_ebs_volume','encrypted',True)
+By default, no errors will be raised if a property value is missing on a resource. This changes the behavior of .property() calls to raise an error if a property is not found on a resource.
 
-# Pass in a list
-resource_types = ['aws_ebs_volume','aws_another_type_of_volume']
-assert_resource_property_value_equals(resource_types,'encrypted',True)
-```
+### Validator.enable_variable_expansion()
 
-#### assert_resource_property_value_equals(resource_type, property, value)
-For all resources of type `resource_type`, check that the value of `property` equals `value`
+By default, variables in property values will not be calculated against their default values. This changes the behaviour of all Validation functions, to work out the value of a string when the variables have default values.
 
-#### assert_nested_resource_property_value_equals(resource_type,nested_resource_type,property,value)
-For all resources of type `resource_type`, check that all nested resources of type `nested_resource_type` have a property called `property` and that its value equals `value`
+eg. `string = "${var.foo}"` will be read as `string = "1"` by the validator if the default value of `foo` is 1.
 
-#### assert_resource_has_properties(resource_type,nested_resource_type,properties[])
-For all resources of type `resource_type`, check that they contain all the property names listed in `properties[]`. Any missing properties will cause an `AssertionError`.
+## Search functions
 
-#### assert_nested_resource_has_properties(resource_type,nested_resource_type,properties[])
-For all resources of type `resource_type`, check that all nested resources of type `nested_resource_type` contain all the property names listed in `properties[]`. Any missing properties will cause an `AssertionError`.
+These are used to gather property values together so that they can be validated.
 
-#### assert_resource_property_value_matches_regex(resource_type, property, regex)
-For all resources of type `resource_type`, check that the value of `property` matches regex `regex`
+### Validator.resources([resource_types])
+Searches for all resources of the required types and outputs a `TerraformResourceList`.
 
-#### assert_nested_resource_property_value_matches_regex(resource_type, nested_resource_type, property, regex)
-For all resources of type `resource_type`, ccheck that all nested resources of type `nested_resource_type` have a property called `property` and that its value matches regex `regex`
+Can be chained with a `.property()` function.
 
-#### assert_resource_regexproperty_value_equals(resource_type, regex, value)
-For all resources of type `resource_type`, check that it has a property with a name that matches `regex`, and that its value is set to `value`
+Outputs: `TerraformResourceList`
 
-#### assert_resource_regexproperty_value_equals(resource_type, nested_resource_type regex, value)
-For all resources of type `resource_type`, check that all nested resources of type `nested_resource_type` has a property with a name that matches `regex`, and that its value is set to `value`
+### TerraformResourceList.property(property_name)
+
+Collects all top-level properties in a `TerraformResourceList`  and exposes methods that can be used to validate the property values.
+
+Can be chained with another `.property()` call to fetch nested properties.
+
+eg. ``.resource('aws_instance').property('name')``
+
+### TerraformResourceList.find_property(regex)
+
+Similar to `TerraformResourceList.property()`, except that it will attempt to use a regex string to search for the property.
+
+eg. ``.resource('aws_instance').find_property('tag[a-z]')``
+
+
+### TerraformPropertyList.property(property_name)
+
+Collects all nested properties in `TerraformPropertyList` and exposes methods that can be used to validate the property values.
+
+eg. ``.resource('aws_instance').property('tags').property('name')``
+
+
+### TerraformPropertyList.find_property(regex)
+
+Similar to `TerraformPropertyList.property()`, except that it will attempt to use a regex string to search for the property.
+
+eg. ``.resource('aws_instance').find_property('tag[a-z]')``
+
+## Validation functions
+
+If there are any errors, these functions will print the error and raise an AssertionError. The purpose of these functions is to validate the property values of different resources.
+
+### TerraformResourceList.has_properties([required_properties])
+
+Will raise an AssertionError if any of the properties in `required_properties` are missing from a `TerraformResourceList`.
+
+### TerraformPropertyList.has_properties([required_properties])
+
+Will raise an AssertionError if any of the properties in `required_properties` are missing from a `TerraformPropertyList`.
+
+### TerraformResourceList.name_matches_regex(regex)
+
+Will raise an AssertionError if the Terraform resource name does not match the value of `regex`
+
+### TerraformPropertyList.equals(expected_value)
+
+Will raise an AssertionError if the value of the property does not equal `expected_value`
+
+### TerraformPropertyList.not_equals(unexpected_value)
+
+Will raise an AssertionError if the value of the property equals `unexpected_value`
+
+### TerraformPropertyList.matches_regex(regex)
+
+Will raise an AssertionError if the value of the property does not match the value of `regex`
+  
