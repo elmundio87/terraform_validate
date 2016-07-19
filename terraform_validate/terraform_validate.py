@@ -73,7 +73,8 @@ class TerraformPropertyList:
     def equals(self,expected_value):
         errors = []
         for property in self.properties:
-            actual_property_value = self.validator.substitute_variable_values_in_string(property.property_value)
+
+            actual_property_value = str(self.validator.substitute_variable_values_in_string(property.property_value)).encode("ascii")
             if str(actual_property_value) != str(expected_value):
                 errors.append("[{0}.{1}.{2}] should be '{3}'. Is: '{4}'".format(property.resource_type,
                                                                         property.resource_name,
@@ -86,7 +87,7 @@ class TerraformPropertyList:
     def not_equals(self,expected_value):
         errors = []
         for property in self.properties:
-            actual_property_value = self.validator.substitute_variable_values_in_string(property.property_value)
+            actual_property_value = str(self.validator.substitute_variable_values_in_string(property.property_value)).encode("ascii")
             if str(actual_property_value) == str(expected_value):
                 errors.append("[{0}.{1}.{2}] should not be '{3}'. Is: '{4}'".format(property.resource_type,
                                                                         property.resource_name,
@@ -103,8 +104,8 @@ class TerraformPropertyList:
             property_names = property.property_value.keys()
             for required_property_name in required_properties:
                 if required_property_name not in property_names:
-                    errors.append(["[{0}.{1}] should have property: '{2}'".format(property.resource_type, property.resource_name,
-                                                                              required_property_name)])
+                    errors.append("[{0}.{1}] should have property: '{2}'".format(property.resource_type, property.resource_name,
+                                                                              required_property_name))
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))
 
@@ -123,7 +124,7 @@ class TerraformPropertyList:
         for property in self.properties:
             actual_property_value = self.validator.substitute_variable_values_in_string(property.property_value)
             if not self.validator.matches_regex_pattern(actual_property_value, regex):
-                errors.append("[{0}.{1}] should match regex '{2}'".format(self.resource_type, resource, regex))
+                errors.append("[{0}.{1}] should match regex '{2}'".format(property.resource_type, "{0}.{1}".format(property.resource_name,property.property_name), regex))
 
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))

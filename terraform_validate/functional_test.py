@@ -10,21 +10,25 @@ class TestValidatorFunctional(unittest.TestCase):
         validator = t.Validator(os.path.join(self.path,"fixtures/resource"))
         validator.assert_resource_property_value_equals('aws_instance', 'value', 1)
         validator.resources('aws_instance').property('value').equals(1)
+        self.assertRaises(AssertionError, validator.resources('aws_instance').property('value').equals,2)
 
     def test_nested_resource(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/nested_resource"))
         validator.assert_nested_resource_property_value_equals('aws_instance','nested_resource','value',1)
         validator.resources('aws_instance').property('nested_resource').property('value').equals(1)
+        self.assertRaises(AssertionError, validator.resources('aws_instance').property('nested_resource').property('value').equals,2)
 
     def test_resource_not_equals(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/resource"))
         validator.assert_resource_property_value_not_equals('aws_instance', 'value', 0)
         validator.resources('aws_instance').property('value').not_equals(0)
+        self.assertRaises(AssertionError, validator.resources('aws_instance').property('value').not_equals,1)
 
     def test_nested_resource_not_equals(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/nested_resource"))
         validator.assert_nested_resource_property_value_not_equals('aws_instance', 'nested_resource', 'value', 0)
         validator.resources('aws_instance').property('nested_resource').property('value').not_equals(0)
+        self.assertRaises(AssertionError,validator.resources('aws_instance').property('nested_resource').property('value').not_equals,1)
 
     def test_resource_required_properties(self):
         required_properties = ['value', 'value2']
@@ -39,22 +43,27 @@ class TestValidatorFunctional(unittest.TestCase):
         validator = t.Validator(os.path.join(self.path, "fixtures/nested_resource"))
         validator.assert_nested_resource_has_properties('aws_instance','nested_resource',required_properties)
         validator.resources('aws_instance').property('nested_resource').has_properties(required_properties)
+        required_properties = ['value', 'value2', 'abc123', 'def456']
+        self.assertRaises(AssertionError, validator.resources('aws_instance').property('nested_resource').has_properties,required_properties)
 
     def test_resource_property_value_matches_regex(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/resource"))
         validator.assert_resource_property_value_matches_regex('aws_instance',"value",'[0-9]')
         validator.resources('aws_instance').property('value').matches_regex('[0-9]')
+        self.assertRaises(AssertionError, validator.resources('aws_instance').property('value').matches_regex,'[a-z]')
 
     def test_nested_resource_property_value_matches_regex(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/nested_resource"))
         validator.assert_nested_resource_property_value_matches_regex('aws_instance','nested_resource',"value",'[0-9]')
         validator.resources('aws_instance').property('nested_resource').property('value').matches_regex('[0-9]')
+        self.assertRaises(AssertionError, validator.resources('aws_instance').property('nested_resource').property('value').matches_regex,'[a-z]')
 
     def test_variable_substitution(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/variable_substitution"))
         validator.enable_variable_expansion()
         validator.assert_resource_property_value_equals('aws_instance','value',1)
         validator.resources('aws_instance').property('value').equals(1)
+        self.assertRaises(AssertionError,validator.resources('aws_instance').property('value').equals,2)
 
     def test_missing_variable_substitution(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/missing_variable"))
@@ -79,21 +88,25 @@ class TestValidatorFunctional(unittest.TestCase):
         validator = t.Validator(os.path.join(self.path, "fixtures/regex_variables"))
         validator.assert_resource_regexproperty_value_equals('aws_instance', '^CPM_Service_[A-Za-z]+$', 1)
         validator.resources('aws_instance').find_property('^CPM_Service_[A-Za-z]+$').equals(1)
+        self.assertRaises(AssertionError,validator.resources('aws_instance').find_property('^CPM_Service_[A-Za-z]+$').equals,2)
 
     def test_searching_for_nested_property_value_using_regex(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/regex_nested_variables"))
         validator.assert_nested_resource_regexproperty_value_equals('aws_instance', 'tags', '^CPM_Service_[A-Za-z]+$', 1)
         validator.resources('aws_instance').property('tags').find_property('^CPM_Service_[A-Za-z]+$').equals(1)
+        self.assertRaises(AssertionError,validator.resources('aws_instance').property('tags').find_property('^CPM_Service_[A-Za-z]+$').equals,2)
 
     def test_resource_type_list(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/resource"))
         validator.assert_resource_property_value_equals(['aws_instance','aws_elb'], 'value', 1)
         validator.resources(['aws_instance','aws_elb']).property('value').equals(1)
+        self.assertRaises(AssertionError,validator.resources(['aws_instance','aws_elb']).property('value').equals,2)
 
     def test_nested_resource_type_list(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/nested_resource"))
         validator.assert_nested_resource_property_value_equals(['aws_instance','aws_elb'],'tags', 'value', 1)
         validator.resources(['aws_instance', 'aws_elb']).property('tags').property('value').equals(1)
+        self.assertRaises(AssertionError,validator.resources(['aws_instance', 'aws_elb']).property('tags').property('value').equals,2)
 
     def test_invalid_terraform_syntax(self):
         self.assertRaises(t.TerraformSyntaxException, t.Validator,os.path.join(self.path, "fixtures/invalid_syntax"))
@@ -103,17 +116,20 @@ class TestValidatorFunctional(unittest.TestCase):
         validator.enable_variable_expansion()
         validator.assert_resource_property_value_equals('aws_instance','value',12)
         validator.resources('aws_instance').property('value').equals(12)
+        self.assertRaises(AssertionError,validator.resources('aws_instance').property('value').equals(21))
 
     def test_nested_multiple_variable_substitutions(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/multiple_variables"))
         validator.enable_variable_expansion()
         validator.assert_nested_resource_property_value_equals('aws_instance','value_block','value',21)
         validator.resources('aws_instance').property('value_block').property('value').equals(21)
+        self.assertRaises(AssertionError,validator.resources('aws_instance').property('value_block').property('value').equals,12)
 
     def test_variable_expansion(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/variable_expansion"))
         validator.assert_resource_property_value_equals('aws_instance','value','${var.bar}')
         validator.resources('aws_instance').property('value').equals('${var.bar}')
+        self.assertRaises(AssertionError,validator.resources('aws_instance').property('value').equals,'${bar.var}')
 
     def test_resource_name_matches_regex(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/resource_name"))
