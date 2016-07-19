@@ -3,20 +3,13 @@ import terraform_validate as t
 
 class TestValidatorNeoUnitHelper(unittest.TestCase):
 
-    def test_get_terraform_resource_that_exists(self):
-        resources = {'resource': { 'aws_instance': {'foo': {'value2': 2, 'value': 1}, 'bar': {'value2': 2, 'value': 1}}}}
-
-        v = t.Validator(resources)
-        a = v.resources('aws_instance')
-        self.assertEqual(a.resources,[{'foo': {'value2': 2, 'value': 1}, 'bar': {'value2': 2, 'value': 1}}])
-
-
-    def test_get_terraform_resource_that_doesnt_exist(self):
-        resources = {'resource': {'aws_instance': {'foo': {'value2': 2, 'value': 1}, 'bar': {'value2': 2, 'value': 1}}}}
-
-        v = t.Validator(resources)
-        a = v.resources('aws_rds')
-        self.assertEqual(a.resources, [])
+    # def test_get_terraform_resource_that_exists(self):
+    #     resources = {'resource': { 'aws_instance': {'foo': {'value2': 2, 'value': 1}, 'bar': {'value2': 2, 'value': 1}}}}
+    #
+    #     v = t.Validator(resources)
+    #     a = v.resources('aws_instance')
+    #     self.assertEqual(a.resource_list,[{'foo': {'value2': 2, 'value': 1}, 'bar': {'value2': 2, 'value': 1}}])
+    #
 
     def test_get_terraform_resource_that_doesnt_exist(self):
         resources = {'resource': {'aws_instance': {'foo': {'value2': 2, 'value': 1}, 'bar': {'value2': 2, 'value': 1}}}}
@@ -24,6 +17,13 @@ class TestValidatorNeoUnitHelper(unittest.TestCase):
         v = t.Validator(resources)
         a = v.resources('aws_rds')
         self.assertEqual(a.resources, [])
+
+    def test_get_terraform_resource_that_doesnt_exist(self):
+        resources = {'resource': {'aws_instance': {'foo': {'value2': 2, 'value': 1}, 'bar': {'value2': 2, 'value': 1}}}}
+
+        v = t.Validator(resources)
+        a = v.resources('aws_rds')
+        self.assertEqual(a.resource_list, [])
 
     def test_get_terraform_property_that_exists(self):
         resources = {'resource': {'aws_instance': {'foo': {'value2': 2, 'value': 1}, 'bar': {'value2': 2, 'value': 1}}}}
