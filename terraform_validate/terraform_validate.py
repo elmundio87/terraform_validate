@@ -144,11 +144,15 @@ class TerraformResourceList:
         self.validator = validator
 
     def property(self, property_name):
+        error = []
         list = TerraformPropertyList(self.validator)
         if len(self.resource_list) > 0:
             for resource_name in self.resource_list[0]:
                 if property_name in self.resource_list[0][resource_name].keys():
                     list.properties.append(TerraformProperty(self.resource_type,resource_name,property_name,self.resource_list[0][resource_name][property_name]))
+                elif self.validator.raise_error_if_property_missing:
+                    error.append("[{0}.{1}] should have property: '{2}".format(self.resource_type,resource_name,property_name))
+
 
         return list
 
@@ -169,13 +173,13 @@ class TerraformResourceList:
 
         if len(self.resource_list) > 0:
             for resource_name in self.resource_list[0]:
-                for property in self.resource_list[0][resource_name]:
-                    property_names = self.resource_list[0][resource_name].keys()
-                    for required_property_name in required_properties:
-                        if required_property_name not in property_names:
-                            errors.append(
-                                ["[{0}.{1}] should have property: '{2}'".format(property.resource_type, property.resource_name,
-                                                                                required_property_name)])
+                property_names = self.resource_list[0][resource_name].keys()
+                for required_property_name in required_properties:
+                    if required_property_name not in property_names:
+                        errors.append(
+                            "[{0}.{1}] should have property: '{2}'".format(self.resource_type,
+                                                                           resource_name,
+                                                                           required_property_name))
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))
 
@@ -226,6 +230,7 @@ class Validator:
 
     def __init__(self,path=None):
         self.variable_expand = False
+        self.raise_error_if_property_missing = False
         if type(path) is not dict:
             if path is not None:
                 self.terraform_config = self.parse_terraform_directory(path)
@@ -245,6 +250,9 @@ class Validator:
 
     def enable_variable_expansion(self):
         self.variable_expand = True
+
+    def error_if_property_missing(self):
+        self.raise_error_if_property_missing = True
 
     def parse_terraform_directory(self,path):
 
