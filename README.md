@@ -24,12 +24,12 @@ class TestEncryptionAtRest(unittest.TestCase):
     def test_aws_ebs_volume(self):
         # Assert that all resources of type 'aws_ebs_volume' are encrypted
         self.v.error_if_property_missing() #Fail any tests if the property does not exist
-        self.v.resources('aws_ebs_volume').property('encrypted').equals(True)
+        self.v.resources('aws_ebs_volume').property('encrypted').should_equal(True)
 
     def test_instance_ebs_block_device(self):
         # Assert that all resources of type 'ebs_block_device' that are inside a 'aws_instance' are encrypted
         self.v.error_if_property_missing()
-        self.v.resources('aws_instance').property('ebs_block_device').property('encrypted').equals(True)
+        self.v.resources('aws_instance').property('ebs_block_device').property('encrypted').should_equal(True)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestEncryptionAtRest)
@@ -67,7 +67,7 @@ class TestEncryptionAtRest(unittest.TestCase):
         # Assert that all resources of type 'aws_instance' and 'aws_ebs_volume' have the correct tags
         tagged_resources = ["aws_instance","aws_ebs_volume"]
         required_tags = ["name","version","owner"]
-        self.v.resources(tagged_resources).property('tags').has_properties(required_tags)
+        self.v.resources(tagged_resources).property('tags').should_have_properties(required_tags)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestEncryptionAtRest)
@@ -131,27 +131,35 @@ eg. ``.resource('aws_instance').find_property('tag[a-z]')``
 
 If there are any errors, these functions will print the error and raise an AssertionError. The purpose of these functions is to validate the property values of different resources.
 
-### TerraformResourceList.has_properties([required_properties])
+### TerraformResourceList.should_have_properties([required_properties])
 
 Will raise an AssertionError if any of the properties in `required_properties` are missing from a `TerraformResourceList`.
 
-### TerraformPropertyList.has_properties([required_properties])
+### TerraformPropertyList.should_have_properties([required_properties])
 
 Will raise an AssertionError if any of the properties in `required_properties` are missing from a `TerraformPropertyList`.
 
-### TerraformResourceList.name_matches_regex(regex)
+### TerraformResourceList.should_not_have_properties([excluded_properties])
+
+Will raise an AssertionError if any of the properties in `required_properties` are missing from a `TerraformResourceList`.
+
+### TerraformPropertyList.should_not_have_properties([excluded_properties])
+
+Will raise an AssertionError if any of the properties in `required_properties` are missing from a `TerraformPropertyList`.
+
+### TerraformResourceList.name_should_match_regex(regex)
 
 Will raise an AssertionError if the Terraform resource name does not match the value of `regex`
 
-### TerraformPropertyList.equals(expected_value)
+### TerraformPropertyList.should_equal(expected_value)
 
 Will raise an AssertionError if the value of the property does not equal `expected_value`
 
-### TerraformPropertyList.not_equals(unexpected_value)
+### TerraformPropertyList.should_not_equal(unexpected_value)
 
 Will raise an AssertionError if the value of the property equals `unexpected_value`
 
-### TerraformPropertyList.matches_regex(regex)
+### TerraformPropertyList.should_match_regex(regex)
 
 Will raise an AssertionError if the value of the property does not match the value of `regex`
   
