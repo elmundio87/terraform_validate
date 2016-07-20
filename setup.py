@@ -7,7 +7,7 @@ setup(
     author_email="elmundio1987@gmail.com",
     description="A library that provides asserts for testing Terraform configuration",
     url="https://github.com/elmundio87/terraform_validator",
-    download_url = 'https://github.com/elmundio87/terraform_validator/tarball/2.0.1',
+    download_url = 'https://github.com/elmundio87/terraform_validate/tarball/2.0.1',
     keywords = ['terraform', 'assert', 'testing'],
     packages = find_packages(),
     install_requires=[
