@@ -92,7 +92,7 @@ class TerraformPropertyList:
 
         return list
 
-    def equals(self,expected_value):
+    def should_equal(self,expected_value):
         errors = []
         for property in self.properties:
 
@@ -113,7 +113,7 @@ class TerraformPropertyList:
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))
 
-    def not_equals(self,expected_value):
+    def should_not_equal(self,expected_value):
         errors = []
         for property in self.properties:
 
@@ -134,7 +134,7 @@ class TerraformPropertyList:
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))
 
-    def has_properties(self,required_properties):
+    def should_have_properties(self,required_properties):
         errors = []
 
         for property in self.properties:
@@ -143,6 +143,19 @@ class TerraformPropertyList:
                 if required_property_name not in property_names:
                     errors.append("[{0}.{1}] should have property: '{2}'".format(property.resource_type, property.resource_name,
                                                                               required_property_name))
+        if len(errors) > 0:
+            raise AssertionError("\n".join(errors))
+
+    def should_not_have_properties(self, excluded_properties):
+        errors = []
+
+        for property in self.properties:
+            property_names = property.property_value.keys()
+            for excluded_property_name in excluded_properties:
+                if excluded_property_name in property_names:
+                    errors.append(
+                        "[{0}.{1}] should not have property: '{2}'".format(property.resource_type, property.resource_name,
+                                                                           excluded_properties))
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))
 
@@ -157,7 +170,7 @@ class TerraformPropertyList:
                                                         property.property_value[nested_property]))
         return list
 
-    def matches_regex(self,regex):
+    def should_match_regex(self,regex):
         errors = []
         for property in self.properties:
             actual_property_value = self.validator.substitute_variable_values_in_string(property.property_value)
@@ -226,7 +239,7 @@ class TerraformResourceList:
                                                              resource.config[property]))
         return list
 
-    def has_properties(self, required_properties):
+    def should_have_properties(self, required_properties):
         errors = []
 
         if len(self.resource_list) > 0:
@@ -241,8 +254,23 @@ class TerraformResourceList:
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))
 
+    def should_not_have_properties(self, excluded_properties):
+        errors = []
 
-    def name_matches_regex(self,regex):
+        if len(self.resource_list) > 0:
+            for resource in self.resource_list:
+                property_names = resource.config.keys()
+                for excluded_property_name in excluded_properties:
+                    if excluded_property_name in property_names:
+                        errors.append(
+                            "[{0}.{1}] should not have property: '{2}'".format(resource,
+                                                                           resource,
+                                                                            excluded_properties))
+        if len(errors) > 0:
+            raise AssertionError("\n".join(errors))
+
+
+    def name_should_match_regex(self,regex):
         errors = []
         for resource in self.resource_list:
             if not self.validator.matches_regex_pattern(resource.name, regex):
