@@ -309,6 +309,9 @@ class Validator:
     def enable_variable_expansion(self):
         self.variable_expand = True
 
+    def disable_variable_expansion(self):
+        self.variable_expand = False
+
     def error_if_property_missing(self):
         self.raise_error_if_property_missing = True
 
