@@ -51,6 +51,29 @@ resource "aws_ebs_volume" "bar" {
 }
 ```
 
+### Check that AWS resources are tagged correctly
+
+```
+import terraform_validate
+
+class TestEncryptionAtRest(unittest.TestCase):
+
+    def setUp(self):
+        # Tell the module where to find your terraform configuration folder
+        self.path = os.path.join(os.path.dirname(os.path.realpath(__file__)),"../terraform")
+        self.v = terraform_validate.Validator(self.path)
+        
+    def test_aws_ebs_volume(self):
+        # Assert that all resources of type 'aws_instance' and 'aws_ebs_volume' have the correct tags
+        tagged_resources = ["aws_instance","aws_ebs_volume"]
+        required_tags = ["name","version","owner"]
+        self.v.resources(tagged_resources).property('tags').has_properties(required_tags)
+
+if __name__ == '__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestEncryptionAtRest)
+    unittest.TextTestRunner(verbosity=0).run(suite)
+```
+
 ## Behaviour functions
 
 These affect the results of the Validation functions in a way that may be required for your tests.
