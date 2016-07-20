@@ -205,7 +205,7 @@ class TerraformResourceList:
         if len(self.resource_list) > 0:
             for resource in self.resource_list:
                 if property_name in resource.config.keys():
-                    list.properties.append(TerraformProperty(resource.type,resource,property_name,resource.config[property_name]))
+                    list.properties.append(TerraformProperty(resource.type,resource.name,property_name,resource.config[property_name]))
                 elif self.validator.raise_error_if_property_missing:
                     errors.append("[{0}.{1}] should have property: '{2}".format(self.resource_type,resource.name,property_name))
 
