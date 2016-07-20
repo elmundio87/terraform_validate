@@ -185,17 +185,20 @@ class TestValidatorFunctional(unittest.TestCase):
         validator.error_if_property_missing()
 
         validator.resources("aws_db_instance_valid").property("storage_encrypted").equals("True")
+        validator.resources("aws_db_instance_valid").property("storage_encrypted").equals(True)
         self.assertRaises(AssertionError, validator.resources("aws_db_instance_invalid").has_properties,"storage_encrypted")
         self.assertRaises(AssertionError, validator.resources("aws_db_instance_invalid").property("storage_encrypted").equals, "True")
         self.assertRaises(AssertionError, validator.resources("aws_db_instance_invalid2").property,"storage_encrypted")
 
         validator.resources("aws_instance_valid").property('ebs_block_device').property("encrypted").equals("True")
+        validator.resources("aws_instance_valid").property('ebs_block_device').property("encrypted").equals(True)
         self.assertRaises(AssertionError, validator.resources("aws_instance_invalid").has_properties, "encrypted")
         self.assertRaises(AssertionError, validator.resources("aws_instance_invalid").property('ebs_block_device').property("encrypted").equals, "True")
         self.assertRaises(AssertionError, validator.resources("aws_instance_invalid2").has_properties, "storage_encrypted")
         self.assertRaises(AssertionError, validator.resources("aws_instance_invalid2").property('ebs_block_device').property,"encrypted")
 
         validator.resources("aws_ebs_volume_valid").property("encrypted").equals("True")
+        validator.resources("aws_ebs_volume_valid").property("encrypted").equals(True)
         self.assertRaises(AssertionError, validator.resources("aws_ebs_volume_invalid").has_properties,"encrypted")
         self.assertRaises(AssertionError, validator.resources("aws_ebs_volume_invalid").property("encrypted").equals, "True")
         self.assertRaises(AssertionError, validator.resources("aws_ebs_volume_invalid2").has_properties, "encrypted")

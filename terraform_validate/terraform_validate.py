@@ -98,7 +98,7 @@ class TerraformPropertyList:
 
             actual_property_value = self.validator.substitute_variable_values_in_string(property.property_value)
 
-            if type(expected_value) is int:
+            if type(expected_value) is int or type(expected_value) is bool:
                 expected_value = str(expected_value)
 
             if type(actual_property_value) is int:
@@ -119,7 +119,7 @@ class TerraformPropertyList:
 
             actual_property_value = self.validator.substitute_variable_values_in_string(property.property_value)
 
-            if type(expected_value) is int:
+            if type(expected_value) is int or type(expected_value) is bool:
                 expected_value = str(expected_value)
 
             if type(actual_property_value) is int:
