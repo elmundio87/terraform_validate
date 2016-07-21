@@ -1,4 +1,4 @@
-# Terraform Validator
+# Terraform Validate
 
 [![Build Status](https://travis-ci.org/elmundio87/terraform_validate.svg?branch=master)](https://travis-ci.org/elmundio87/terraform_validate)
 
