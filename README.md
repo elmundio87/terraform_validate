@@ -1,6 +1,6 @@
 # Terraform Validator
 
-[![Build Status](https://travis-ci.org/elmundio87/terraform_validator.svg?branch=master)](https://travis-ci.org/elmundio87/terraform_validator)
+[![Build Status](https://travis-ci.org/elmundio87/terraform_validate.svg?branch=master)](https://travis-ci.org/elmundio87/terraform_valide)
 
 A python package that assists in the enforcement of user-defined standards in Terraform.
 
