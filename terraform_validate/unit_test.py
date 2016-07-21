@@ -29,8 +29,8 @@ class TestValidatorNeoUnitHelper(unittest.TestCase):
         resources = {'resource': {'aws_instance': {'foo': {'value2': 2, 'value': 1}, 'bar': {'value2': 2, 'value': 1}}}}
 
         v = t.Validator(resources)
-        v.resources('aws_instance').property('value').equals(1)
-        self.assertRaises(AssertionError,  v.resources('aws_instance').property('value').equals,2)
+        v.resources('aws_instance').property('value').should_equal(1)
+        self.assertRaises(AssertionError,  v.resources('aws_instance').property('value').should_equal,2)
 
 
 

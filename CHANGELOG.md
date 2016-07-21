@@ -1,6 +1,13 @@
 CHANGELOG
 =========
 
+## 2.1.0 (2016/07/21)
+
+- Updated validation function names
+- Fixed boolean:string comparison in `.should_equal()` and `.should_not_equal()`
+
+--------------------
+
 ## 2.0.1 (2016/07/19)
 - Re-added `.disable_variable_expansion()` as this function was unintentionally deleted.
 
