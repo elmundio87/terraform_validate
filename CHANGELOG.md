@@ -1,6 +1,12 @@
 CHANGELOG
 =========
 
+## 2.1.2 (2016/07/22)
+
+- Fix the should_have_properties and should_not_have_properties to work properly when given a string thats not in a list
+
+--------------------
+
 ## 2.1.1 (2016/07/22)
 
 - Resource matching done via a string will now work as a regex. Lists passed into `.resource` will work as before.
