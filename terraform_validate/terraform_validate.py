@@ -202,14 +202,18 @@ class TerraformResourceList:
         self.resource_list = []
 
         if type(resource_types) is not list:
-            resource_types = [resource_types]
+            all_resource_types = list(resources.keys())
+            regex = resource_types
+            resource_types = []
+            for resource_type in all_resource_types:
+                if validator.matches_regex_pattern(resource_type, regex):
+                    resource_types.append(resource_type)
 
         for resource_type in resource_types:
             if resource_type in resources.keys():
                 for resource in resources[resource_type]:
                     self.resource_list.append(TerraformResource(resource_type,resource,resources[resource_type][resource]))
 
-        self.resource_type = resource_type
         self.validator = validator
 
     def property(self, property_name):
@@ -220,7 +224,7 @@ class TerraformResourceList:
                 if property_name in resource.config.keys():
                     list.properties.append(TerraformProperty(resource.type,resource.name,property_name,resource.config[property_name]))
                 elif self.validator.raise_error_if_property_missing:
-                    errors.append("[{0}.{1}] should have property: '{2}".format(self.resource_type,resource.name,property_name))
+                    errors.append("[{0}.{1}] should have property: '{2}'".format(resource.type,resource.name,property_name))
 
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))
@@ -368,6 +372,12 @@ class Validator:
         return not (self.get_regex_matches(regex, variable) is None)
 
     def get_regex_matches(self, regex, variable):
+        if regex[-1:] != "$":
+            regex = regex + "$"
+
+        if regex[0] != "^":
+            regex = "^" + regex
+
         p = re.compile(regex)
         return p.match(str(variable))
 

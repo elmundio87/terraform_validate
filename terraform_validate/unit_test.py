@@ -32,8 +32,18 @@ class TestValidatorNeoUnitHelper(unittest.TestCase):
         v.resources('aws_instance').property('value').should_equal(1)
         self.assertRaises(AssertionError,  v.resources('aws_instance').property('value').should_equal,2)
 
+    def test_get_all_resources(self):
+        resources = {'resource': {'aws_instance': {'foo': {'value': 1}}, "aws_rds_instance": { 'bar': {'value': 1}}}}
+        v = t.Validator(resources)
+        a = v.resources(".*").property('value')
+        self.assertEqual(len(a.properties),2)
 
 
+    def test_get_all_aws_resources(self):
+        resources = {'resource': {'aws_instance': {'foo': {'value': 1}}, "azure_rds_instance": {'bar': {'value': 1}}}}
+        v = t.Validator(resources)
+        a = v.resources("aws_.*").property('value')
+        self.assertEqual(len(a.properties), 1)
 
 class TestValidatorUnitHelper(unittest.TestCase):
 
@@ -57,6 +67,11 @@ class TestValidatorUnitHelper(unittest.TestCase):
     def test_matches_regex_is_false(self):
         v = t.Validator()
         a = v.matches_regex_pattern('abc_123', '^abc_321$')
+        self.assertFalse(a)
+
+    def test_matches_regex_whole_string_only(self):
+        v = t.Validator()
+        a = v.matches_regex_pattern('abc_123', 'abc')
         self.assertFalse(a)
 
     def test_can_handle_no_variables_in_string(self):
@@ -140,17 +155,17 @@ class TestValidatorUnitAssertClosures(unittest.TestCase):
 
     def test_resource_regexproperty_value_equals_expected_value(self):
         v = t.Validator()
-        a = v.resource_regexproperty_value_equals("foo", {'my_property':1}, 'aws_instance', '^my_', 1)
+        a = v.resource_regexproperty_value_equals("foo", {'my_property':1}, 'aws_instance', '^my_.*', 1)
         self.assertEqual(a, [])
 
     def test_resource_regexproperty_value_equals_missing_property(self):
         v = t.Validator()
-        a = v.resource_regexproperty_value_equals("foo", {'mein_property':1}, 'aws_instance', '^my_', 1)
-        self.assertEqual(a, ["[aws_instance.foo] No properties were found that match the regex '^my_'"])
+        a = v.resource_regexproperty_value_equals("foo", {'mein_property':1}, 'aws_instance', '^my_.*', 1)
+        self.assertEqual(a, ["[aws_instance.foo] No properties were found that match the regex '^my_.*'"])
 
     def test_resource_regexproperty_value_equals_wrong_value(self):
         v = t.Validator()
-        a = v.resource_regexproperty_value_equals("foo", {'my_property':2}, 'aws_instance', '^my_', 1)
+        a = v.resource_regexproperty_value_equals("foo", {'my_property':2}, 'aws_instance', '^my_.*', 1)
         self.assertEqual(a, ["[aws_instance.foo.my_property] should be '1'. Is: '2'"])
 
 class TestTerraformVariableParser(unittest.TestCase):

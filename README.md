@@ -97,6 +97,9 @@ Searches for all resources of the required types and outputs a `TerraformResourc
 
 Can be chained with a `.property()` function.
 
+If passed a string as an argument, search through all resource types and list the ones that match the string as a regex.
+If passed a list as an argument, only use the types that are inside the list.
+
 Outputs: `TerraformResourceList`
 
 ### TerraformResourceList.property(property_name)
