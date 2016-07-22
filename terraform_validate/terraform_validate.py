@@ -134,28 +134,34 @@ class TerraformPropertyList:
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))
 
-    def should_have_properties(self,required_properties):
+    def should_have_properties(self, properties_list):
         errors = []
+
+        if type(properties_list) is not  list:
+            properties_list = [properties_list]
 
         for property in self.properties:
             property_names = property.property_value.keys()
-            for required_property_name in required_properties:
+            for required_property_name in properties_list:
                 if required_property_name not in property_names:
                     errors.append("[{0}.{1}] should have property: '{2}'".format(property.resource_type, property.resource_name,
                                                                               required_property_name))
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))
 
-    def should_not_have_properties(self, excluded_properties):
+    def should_not_have_properties(self, properties_list):
         errors = []
+
+        if type(properties_list) is not list:
+            properties_list = [properties_list]
 
         for property in self.properties:
             property_names = property.property_value.keys()
-            for excluded_property_name in excluded_properties:
+            for excluded_property_name in properties_list:
                 if excluded_property_name in property_names:
                     errors.append(
                         "[{0}.{1}] should not have property: '{2}'".format(property.resource_type, property.resource_name,
-                                                                           excluded_properties))
+                                                                           properties_list))
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))
 
@@ -243,13 +249,16 @@ class TerraformResourceList:
                                                              resource.config[property]))
         return list
 
-    def should_have_properties(self, required_properties):
+    def should_have_properties(self, properties_list):
         errors = []
+
+        if type(properties_list) is not list:
+            properties_list = [properties_list]
 
         if len(self.resource_list) > 0:
             for resource in self.resource_list:
                 property_names = resource.config.keys()
-                for required_property_name in required_properties:
+                for required_property_name in properties_list:
                     if required_property_name not in property_names:
                         errors.append(
                             "[{0}.{1}] should have property: '{2}'".format(resource,
@@ -258,18 +267,21 @@ class TerraformResourceList:
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))
 
-    def should_not_have_properties(self, excluded_properties):
+    def should_not_have_properties(self, properties_list):
         errors = []
+
+        if type(properties_list) is not list:
+            properties_list = [properties_list]
 
         if len(self.resource_list) > 0:
             for resource in self.resource_list:
                 property_names = resource.config.keys()
-                for excluded_property_name in excluded_properties:
+                for excluded_property_name in properties_list:
                     if excluded_property_name in property_names:
                         errors.append(
                             "[{0}.{1}] should not have property: '{2}'".format(resource,
-                                                                           resource,
-                                                                            excluded_properties))
+                                                                               resource,
+                                                                               properties_list))
         if len(errors) > 0:
             raise AssertionError("\n".join(errors))
 
