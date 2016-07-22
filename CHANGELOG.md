@@ -1,6 +1,13 @@
 CHANGELOG
 =========
 
+## 2.1.1 (2016/07/22)
+
+- Resource matching done via a string will now work as a regex. Lists passed into `.resource` will work as before.
+- Regex matching is more strict, will automatically enclose strings with ^ and $ characters.
+
+--------------------
+
 ## 2.1.0 (2016/07/21)
 
 - Updated validation function names
