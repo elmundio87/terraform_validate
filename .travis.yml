@@ -10,6 +10,7 @@ python:
   - "pypy"
 # command to install dependencies
 install:
+  - pip install unittest2
   - pip install .
   - pip install -r requirements.txt
 # command to run tests

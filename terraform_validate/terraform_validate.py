@@ -88,7 +88,7 @@ class TerraformPropertyList:
                 errors.append("[{0}.{1}] should have property: '{2}'".format(property.resource_type, "{0}.{1}".format(property.resource_name,property.property_name), property_name))
 
         if len(errors) > 0:
-            raise AssertionError("\n".join(errors))
+            raise AssertionError("\n".join(sorted(errors)))
 
         return list
 
@@ -111,7 +111,7 @@ class TerraformPropertyList:
                                                                         expected_value,
                                                                         actual_property_value))
         if len(errors) > 0:
-            raise AssertionError("\n".join(errors))
+            raise AssertionError("\n".join(sorted(errors)))
 
     def should_not_equal(self,expected_value):
         errors = []
@@ -131,8 +131,9 @@ class TerraformPropertyList:
                                                                         property.property_name,
                                                                         expected_value,
                                                                         actual_property_value))
+
         if len(errors) > 0:
-            raise AssertionError("\n".join(errors))
+            raise AssertionError("\n".join(sorted(errors)))
 
     def should_have_properties(self, properties_list):
         errors = []
@@ -144,10 +145,12 @@ class TerraformPropertyList:
             property_names = property.property_value.keys()
             for required_property_name in properties_list:
                 if required_property_name not in property_names:
-                    errors.append("[{0}.{1}] should have property: '{2}'".format(property.resource_type, property.resource_name,
-                                                                              required_property_name))
+                    errors.append("[{0}.{1}.{2}] should have property: '{3}'".format(property.resource_type,
+                                                                                     property.resource_name,
+                                                                                     property.property_name,
+                                                                                    required_property_name))
         if len(errors) > 0:
-            raise AssertionError("\n".join(errors))
+            raise AssertionError("\n".join(sorted(errors)))
 
     def should_not_have_properties(self, properties_list):
         errors = []
@@ -160,10 +163,12 @@ class TerraformPropertyList:
             for excluded_property_name in properties_list:
                 if excluded_property_name in property_names:
                     errors.append(
-                        "[{0}.{1}] should not have property: '{2}'".format(property.resource_type, property.resource_name,
-                                                                           properties_list))
+                        "[{0}.{1}.{2}] should not have property: '{3}'".format(property.resource_type,
+                                                                               property.resource_name,
+                                                                               property.property_name,
+                                                                               excluded_property_name))
         if len(errors) > 0:
-            raise AssertionError("\n".join(errors))
+            raise AssertionError("\n".join(sorted(errors)))
 
     def find_property(self,regex):
         list = TerraformPropertyList(self.validator)
@@ -184,7 +189,7 @@ class TerraformPropertyList:
                 errors.append("[{0}.{1}] should match regex '{2}'".format(property.resource_type, "{0}.{1}".format(property.resource_name,property.property_name), regex))
 
         if len(errors) > 0:
-            raise AssertionError("\n".join(errors))
+            raise AssertionError("\n".join(sorted(errors)))
 
 class TerraformProperty:
 
@@ -233,7 +238,7 @@ class TerraformResourceList:
                     errors.append("[{0}.{1}] should have property: '{2}'".format(resource.type,resource.name,property_name))
 
         if len(errors) > 0:
-            raise AssertionError("\n".join(errors))
+            raise AssertionError("\n".join(sorted(errors)))
 
         return list
 
@@ -244,7 +249,7 @@ class TerraformResourceList:
                 for property in resource.config:
                     if self.validator.matches_regex_pattern(property, regex):
                         list.properties.append(TerraformProperty(resource.type,
-                                                             resource,
+                                                             resource.name,
                                                              property,
                                                              resource.config[property]))
         return list
@@ -261,11 +266,11 @@ class TerraformResourceList:
                 for required_property_name in properties_list:
                     if required_property_name not in property_names:
                         errors.append(
-                            "[{0}.{1}] should have property: '{2}'".format(resource,
-                                                                           resource,
+                            "[{0}.{1}] should have property: '{2}'".format(resource.type,
+                                                                           resource.name,
                                                                            required_property_name))
         if len(errors) > 0:
-            raise AssertionError("\n".join(errors))
+            raise AssertionError("\n".join(sorted(errors)))
 
     def should_not_have_properties(self, properties_list):
         errors = []
@@ -279,21 +284,21 @@ class TerraformResourceList:
                 for excluded_property_name in properties_list:
                     if excluded_property_name in property_names:
                         errors.append(
-                            "[{0}.{1}] should not have property: '{2}'".format(resource,
-                                                                               resource,
-                                                                               properties_list))
+                            "[{0}.{1}] should not have property: '{2}'".format(resource.type,
+                                                                               resource.name,
+                                                                               excluded_property_name))
         if len(errors) > 0:
-            raise AssertionError("\n".join(errors))
+            raise AssertionError("\n".join(sorted(errors)))
 
 
     def name_should_match_regex(self,regex):
         errors = []
         for resource in self.resource_list:
             if not self.validator.matches_regex_pattern(resource.name, regex):
-                errors.append("[{0}.{1}] should match regex '{2}'".format(resource.type, resource.name, regex))
+                errors.append("[{0}.{1}] name should match regex '{2}'".format(resource.type, resource.name, regex))
 
         if len(errors) > 0:
-            raise AssertionError("\n".join(errors))
+            raise AssertionError("\n".join(sorted(errors)))
 
 class TerraformVariable:
 
@@ -305,28 +310,28 @@ class TerraformVariable:
     def default_value_exists(self):
         errors = []
         if self.value == None:
-            errors.append("Variable {0} should have a default value".format(self.name))
+            errors.append("Variable '{0}' should have a default value".format(self.name))
 
         if len(errors) > 0:
-            raise AssertionError("\n".join(errors))
+            raise AssertionError("\n".join(sorted(errors)))
 
     def default_value_equals(self,expected_value):
         errors = []
 
         if self.value != expected_value:
-            errors.append("Variable {0} should have a default value of {1}. Is: {2}".format(self.name,
+            errors.append("Variable '{0}' should have a default value of {1}. Is: {2}".format(self.name,
                                                                                             expected_value,
                                                                                             self.value))
         if len(errors) > 0:
-            raise AssertionError("\n".join(errors))
+            raise AssertionError("\n".join(sorted(errors)))
 
     def default_value_matches_regex(self,regex):
         errors = []
         if not self.validator.matches_regex_pattern(self.value, regex):
-            errors.append("Variable {0} should have a default value that matches regex '{1}'. Is: {2}".format(self.name,regex,self.value))
+            errors.append("Variable '{0}' should have a default value that matches regex '{1}'. Is: {2}".format(self.name,regex,self.value))
 
         if len(errors) > 0:
-            raise AssertionError("\n".join(errors))
+            raise AssertionError("\n".join(sorted(errors)))
 
 class Validator:
 
@@ -451,7 +456,7 @@ class Validator:
         error = closure(variable_name, default_variable_value)
         if error is not None: errors += error
         if len(errors) > 0:
-            raise AssertionError("\n".join(errors))
+            raise AssertionError("\n".join(sorted(errors)))
 
     @deprecated
     def assert_resource_base(self, resource_types, closure):
@@ -470,7 +475,7 @@ class Validator:
                         error = closure(resource_type, resource_name,resource[resource_name])
                     if error is not None: errors += error
         if len(errors) > 0:
-            raise AssertionError("\n".join(errors))
+            raise AssertionError("\n".join(sorted(errors)))
 
     @deprecated
     def assert_nested_resource_base(self, resource_types, nested_resource_name, closure):
@@ -493,7 +498,7 @@ class Validator:
                         error = closure(resource_type, "{0}.{1}".format(resource_name,nested_resource_name),nested_resource)
                         if error is not None: errors += error
         if len(errors) > 0:
-            raise AssertionError("\n".join(errors))
+            raise AssertionError("\n".join(sorted(errors)))
 
     def resource_property_value_equals(self, resource_name, resource, resource_type, property, property_value):
         calculated_property_value = self.get_terraform_property_value(property, resource)
