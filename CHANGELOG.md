@@ -1,6 +1,12 @@
 CHANGELOG
 =========
 
+## 2.1.3 (2016/07/25)
+
+- Fix all error messages to ensure that they provide the correct information. All error messages are now tested.
+
+--------------------
+
 ## 2.1.2 (2016/07/22)
 
 - Fix the should_have_properties and should_not_have_properties to work properly when given a string thats not in a list
