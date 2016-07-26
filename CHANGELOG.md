@@ -1,6 +1,13 @@
 CHANGELOG
 =========
 
+
+## 2.1.4 (2016/07/26)
+
+- No real changes, just a code coverage version bump
+
+--------------------
+
 ## 2.1.3 (2016/07/25)
 
 - Fix all error messages to ensure that they provide the correct information. All error messages are now tested.
