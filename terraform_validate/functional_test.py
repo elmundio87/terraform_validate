@@ -160,6 +160,18 @@ class TestValidatorFunctional(unittest.TestCase):
         validator.assert_nested_resource_has_properties('aws_rds_instance', 'nested_resource', required_properties)
         validator.resources('aws_rds_instance').property('nested_resource').should_have_properties(required_properties)
 
+    def test_searching_for_property_on_nonexistant_nested_resource(self):
+        validator = t.Validator(os.path.join(self.path, "fixtures/resource"))
+        validator.error_if_property_missing()
+        expected_error = self.error_list_format(
+                                                [
+                                                    "[aws_instance.bar] should have property: 'tags'",
+                                                    "[aws_instance.foo] should have property: 'tags'"
+                                                ]
+                                                )
+        with self.assertRaisesRegexp(AssertionError, expected_error):
+            validator.resources('aws_instance').property('tags').property('tagname').should_equal(1)
+
     def test_searching_for_property_value_using_regex(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/regex_variables"))
         validator.assert_resource_regexproperty_value_equals('aws_instance', '^CPM_Service_[A-Za-z]+$', 1)
