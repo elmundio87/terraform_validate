@@ -307,6 +307,12 @@ class TestValidatorFunctional(unittest.TestCase):
         self.assertRaises(t.TerraformUnimplementedInterpolationException,validator.assert_resource_property_value_equals, 'aws_instance', 'value', "abc")
         self.assertRaises(t.TerraformUnimplementedInterpolationException, validator.resources('aws_instance').property('value').should_equal,'abc')
 
+    def test_boolean_equal(self):
+        validator = t.Validator(os.path.join(self.path, "fixtures/boolean_compare"))
+        validator.resources("aws_db_instance").property("value1").should_equal(True)
+        validator.resources("aws_db_instance").property("value2").should_equal(True)
+        validator.resources("aws_db_instance").property("value3").should_equal(True)
+
     def test_encryption_scenario(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/enforce_encrypted"))
         validator.error_if_property_missing()
