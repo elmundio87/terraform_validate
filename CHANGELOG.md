@@ -1,6 +1,9 @@
 CHANGELOG
 =========
 
+## 2.1.5 (2016/08/01)
+
+- Better string <-> boolean comparison in `should_equal` and `should_not_equal`
 
 ## 2.1.4 (2016/07/26)
 
