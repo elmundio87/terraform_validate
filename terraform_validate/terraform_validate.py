@@ -355,38 +355,6 @@ class TerraformResourceList:
         if len(errors) > 0:
             raise AssertionError("\n".join(sorted(errors)))
 
-class TerraformVariable:
-
-    def __init__(self,validator,name,value):
-        self.validator = validator
-        self.name = name
-        self.value = value
-
-    def default_value_exists(self):
-        errors = []
-        if self.value == None:
-            errors.append("Variable '{0}' should have a default value".format(self.name))
-
-        if len(errors) > 0:
-            raise AssertionError("\n".join(sorted(errors)))
-
-    def default_value_equals(self,expected_value):
-        errors = []
-
-        if self.value != expected_value:
-            errors.append("Variable '{0}' should have a default value of {1}. Is: {2}".format(self.name,
-                                                                                            expected_value,
-                                                                                            self.value))
-        if len(errors) > 0:
-            raise AssertionError("\n".join(sorted(errors)))
-
-    def default_value_matches_regex(self,regex):
-        errors = []
-        if not self.validator.matches_regex_pattern(self.value, regex):
-            errors.append("Variable '{0}' should have a default value that matches regex '{1}'. Is: {2}".format(self.name,regex,self.value))
-
-        if len(errors) > 0:
-            raise AssertionError("\n".join(sorted(errors)))
 
 class Validator:
 
@@ -407,8 +375,13 @@ class Validator:
 
         return TerraformResourceList(self, type, resources)
 
-    def variable(self, name):
-        return TerraformVariable(self, name, self.get_terraform_variable_value(name))
+    def variables(self, name):
+        if 'variable' not in self.terraform_config.keys():
+            resources = {}
+        else:
+            resources = self.terraform_config['variable']
+
+        return TerraformResourceList(self, "variable", resources )
 
     def enable_variable_expansion(self):
         self.variable_expand = True
@@ -455,6 +428,12 @@ class Validator:
             return re.match(regex, variable, re.DOTALL)
         return re.match(regex, variable)
 
+    def get_terraform_variable(self,variable):
+        if ('variable' not in self.terraform_config.keys()) or (variable not in self.terraform_config['variable'].keys()):
+            raise TerraformVariableException("There is no Terraform variable '{0}'".format(variable))
+        return self.terraform_config['variable'][variable]
+
+    @deprecated
     def get_terraform_variable_value(self,variable):
         if ('variable' not in self.terraform_config.keys()) or (variable not in self.terraform_config['variable'].keys()):
             raise TerraformVariableException("There is no Terraform variable '{0}'".format(variable))

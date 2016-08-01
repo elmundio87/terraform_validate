@@ -277,20 +277,21 @@ class TestValidatorFunctional(unittest.TestCase):
         validator = t.Validator(os.path.join(self.path, "fixtures/default_variable"))
         expected_error = self.error_list_format("Variable 'bar' should have a default value")
         with self.assertRaisesRegexp(AssertionError, expected_error):
-            validator.variable('bar').default_value_exists()
+            validator.variables('bar').should_have_properties('default')
 
     def test_variable_default_value_equals(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/default_variable"))
+
         expected_error = self.error_list_format("Variable 'bar' should have a default value of 2. Is: None")
         with self.assertRaisesRegexp(AssertionError, expected_error):
-            validator.variable('bar').default_value_equals(2)
-        validator.variable('bar').default_value_equals(None)
+            validator.variables('bar').property('default').should_equal(2)
+        validator.variables('bar').should_not_have_properties('default')
 
     def test_variable_default_value_matches_regex(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/default_variable"))
         expected_error = self.error_list_format("Variable 'bizz' should have a default value that matches regex '^123'. Is: abc")
         with self.assertRaisesRegexp(AssertionError, expected_error):
-            validator.variable('bizz').default_value_matches_regex('^123')
+            validator.variable('bizz').property('default').should_match_regex('^123')
 
     def test_no_exceptions_raised_when_no_resources_present(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/no_resources"))
