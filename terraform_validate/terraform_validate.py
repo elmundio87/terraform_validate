@@ -98,11 +98,10 @@ class TerraformPropertyList:
 
             actual_property_value = self.validator.substitute_variable_values_in_string(property.property_value)
 
-            if type(expected_value) is int or type(expected_value) is bool:
-                expected_value = str(expected_value)
-
-            if type(actual_property_value) is int:
-                actual_property_value = str(actual_property_value)
+            expected_value = self.int2str(expected_value)
+            actual_property_value = self.int2str(actual_property_value)
+            expected_value = self.bool2str(expected_value)
+            actual_property_value = self.bool2str(actual_property_value)
 
             if actual_property_value != expected_value:
                 errors.append("[{0}.{1}.{2}] should be '{3}'. Is: '{4}'".format(property.resource_type,
@@ -119,11 +118,10 @@ class TerraformPropertyList:
 
             actual_property_value = self.validator.substitute_variable_values_in_string(property.property_value)
 
-            if type(expected_value) is int or type(expected_value) is bool:
-                expected_value = str(expected_value)
-
-            if type(actual_property_value) is int:
-                actual_property_value = str(actual_property_value)
+            actual_property_value = self.int2str(actual_property_value)
+            expected_value = self.int2str(expected_value)
+            expected_value = self.bool2str(expected_value)
+            actual_property_value = self.bool2str(actual_property_value)
 
             if actual_property_value == expected_value:
                 errors.append("[{0}.{1}.{2}] should not be '{3}'. Is: '{4}'".format(property.resource_type,
@@ -190,6 +188,18 @@ class TerraformPropertyList:
 
         if len(errors) > 0:
             raise AssertionError("\n".join(sorted(errors)))
+
+    def bool2str(self,bool):
+        if str(bool).lower() in ["true"]:
+            return "True"
+        if str(bool).lower() in ["false"]:
+            return "False"
+        return bool
+
+    def int2str(self, property_value):
+        if type(property_value) is int:
+            property_value = str(property_value)
+        return property_value
 
 class TerraformProperty:
 

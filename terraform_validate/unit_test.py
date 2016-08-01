@@ -99,6 +99,12 @@ class TestValidatorUnitHelper(unittest.TestCase):
         a = v.list_terraform_variables_in_string(1)
         self.assertEqual(a, [])
 
+    def test_bool_to_str(self):
+        self.assertEqual(t.TerraformPropertyList.bool2str(self,True),"True")
+        self.assertEqual(t.TerraformPropertyList.bool2str(self, "True"), "True")
+        self.assertEqual(t.TerraformPropertyList.bool2str(self, False), "False")
+        self.assertEqual(t.TerraformPropertyList.bool2str(self, "False"), "False")
+
     if __name__ == '__main__':
         suite = unittest.TestLoader().loadTestsFromTestCase(TestValidatorUnitHelper)
         unittest.TextTestRunner(verbosity=0).run(suite)

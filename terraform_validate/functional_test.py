@@ -309,9 +309,12 @@ class TestValidatorFunctional(unittest.TestCase):
 
     def test_boolean_equal(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/boolean_compare"))
-        validator.resources("aws_db_instance").property("value1").should_equal(True)
-        validator.resources("aws_db_instance").property("value2").should_equal(True)
-        validator.resources("aws_db_instance").property("value3").should_equal(True)
+        values = [True, "true", "True"]
+
+        for i in range(1,5):
+            for value in values:
+                validator.resources("aws_db_instance").property("storage_encrypted{0}".format(i)).should_equal(value)
+
 
     def test_encryption_scenario(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/enforce_encrypted"))
