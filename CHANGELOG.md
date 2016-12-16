@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+## 2.1.6 (2016/12/16)
+
+- Fix multiline regex - thanks @eredi93
+
 ## 2.1.5 (2016/08/01)
 
 - Better string <-> boolean comparison in `should_equal` and `should_not_equal`
