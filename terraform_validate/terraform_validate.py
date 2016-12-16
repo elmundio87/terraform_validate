@@ -406,7 +406,10 @@ class Validator:
             regex = "^" + regex
 
         p = re.compile(regex)
-        return p.match(str(variable))
+        variable = str(variable)
+        if '\n' in variable:
+            return p.match(variable, re.DOTALL)
+        return p.match(variable)
 
     def get_terraform_variable_name(self, s):
         return self.get_regex_matches('\${var.(.*)}', s).group(1)
