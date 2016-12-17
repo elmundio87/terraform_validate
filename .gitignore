@@ -6,3 +6,4 @@ terraform_validate/__init__.pyc
 terraform_validate/__pycache__/
 terraform_validate/terraform_validate.pyc
 terraform_validate.egg-info/
+htmlcov/
