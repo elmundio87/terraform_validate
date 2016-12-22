@@ -1,6 +1,13 @@
 CHANGELOG
 =========
 
+## 2.3.1 (2016/12/22)
+
+- Messed up the 2.3.0 release so re-releasing
+
+--------------------
+
+
 ## 2.3.0 (2016/12/22)
 
 - Removed all methods that were marked as deprecated in v2.0.0
