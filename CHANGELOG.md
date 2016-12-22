@@ -1,6 +1,13 @@
 CHANGELOG
 =========
 
+## 2.3.0 (2016/12/22)
+
+- Removed all methods that were marked as deprecated in v2.0.0
+- Improved test coverage
+
+--------------------
+
 ## 2.2.0 (2016/12/22)
 
 - Added functions to validate list contents - thanks [@eredi93](https://github.com/eredi93)
