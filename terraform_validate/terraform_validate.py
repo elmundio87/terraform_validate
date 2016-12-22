@@ -3,19 +3,18 @@ import os
 import re
 import warnings
 
-def deprecated(func):
-    '''This is a decorator which can be used to mark functions
-    as deprecated. It will result in a warning being emitted
-    when the function is used.'''
-    def new_func(*args, **kwargs):
-        print("The method '{0}' is deprecated as of v2.0. Please refer to the readme for the recommended usage of this library.".format(func.__name__))
-        print("'{0}' will be removed in a future release.".format(func.__name__))
-        return func(*args, **kwargs)
-    new_func.__name__ = func.__name__
-    new_func.__doc__ = func.__doc__
-    new_func.__dict__.update(func.__dict__)
-    return new_func
-
+# def deprecated(func):
+#     '''This is a decorator which can be used to mark functions
+#     as deprecated. It will result in a warning being emitted
+#     when the function is used.'''
+#     def new_func(*args, **kwargs):
+#         print("The method '{0}' is deprecated as of v2.0. Please refer to the readme for the recommended usage of this library.".format(func.__name__))
+#         print("'{0}' will be removed in a future release.".format(func.__name__))
+#         return func(*args, **kwargs)
+#     new_func.__name__ = func.__name__
+#     new_func.__doc__ = func.__doc__
+#     new_func.__dict__.update(func.__dict__)
+#     return new_func
 
 class TerraformSyntaxException(Exception):
     pass
@@ -63,11 +62,6 @@ class TerraformVariableParser:
                 else:
                     temp_function += self.string[self.index]
                 self.index += 1
-
-class TerraformVariable:
-
-    def default_value(self):
-        return TerraformProperty()
 
 class TerraformPropertyList:
 
@@ -187,7 +181,7 @@ class TerraformPropertyList:
     def should_have_properties(self, properties_list):
         errors = []
 
-        if type(properties_list) is not  list:
+        if type(properties_list) is not list:
             properties_list = [properties_list]
 
         for property in self.properties:
@@ -456,14 +450,10 @@ class Validator:
         if regex[0] != "^":
             regex = "^" + regex
 
-        p = re.compile(regex)
         variable = str(variable)
         if '\n' in variable:
-            return p.match(variable, re.DOTALL)
-        return p.match(variable)
-
-    def get_terraform_variable_name(self, s):
-        return self.get_regex_matches('\${var.(.*)}', s).group(1)
+            return re.match(regex, variable, re.DOTALL)
+        return re.match(regex, variable)
 
     def get_terraform_variable_value(self,variable):
         if ('variable' not in self.terraform_config.keys()) or (variable not in self.terraform_config['variable'].keys()):
@@ -471,13 +461,6 @@ class Validator:
         if 'default' not in self.terraform_config['variable'][variable].keys():
             return None
         return self.terraform_config['variable'][variable]['default']
-
-    def get_terraform_properties_that_match_regex(self,regex,properties):
-        out = {}
-        for property in properties:
-            if self.matches_regex_pattern(property,regex):
-                out[property] = properties[property]
-        return out
 
     def substitute_variable_values_in_string(self, s):
         if self.variable_expand:
@@ -500,200 +483,7 @@ class Validator:
     def list_terraform_variables_in_string(self, s):
         return re.findall('\${(.*?)}',str(s))
 
-    def get_terraform_property_value(self, name,values):
-        if name not in values:
-            return None
-        for value in values:
-            if self.variable_expand:
-                values[value] = self.substitute_variable_values_in_string(values[value])
-        return values[name]
-
     def convert_to_list(self, nested_resources):
         if not type(nested_resources) == list:
             nested_resources = [nested_resources]
         return nested_resources
-
-    @deprecated
-    def assert_variable_base(self, variable_name, closure):
-        errors = []
-        default_variable_value = self.get_terraform_variable_value(variable_name)
-        error = closure(variable_name, default_variable_value)
-        if error is not None: errors += error
-        if len(errors) > 0:
-            raise AssertionError("\n".join(sorted(errors)))
-
-    @deprecated
-    def assert_resource_base(self, resource_types, closure):
-        errors = []
-        resources = {}
-        resource_types = self.convert_to_list(resource_types)
-        for resource_type in resource_types:
-            if resource_type not in resources.keys():
-                resources[resource_type] = []
-            if 'resource' in self.terraform_config.keys():
-                resources[resource_type] += self.get_terraform_resources(resource_type, self.terraform_config['resource'])
-
-        for resource_type in resource_types:
-            for resource in resources[resource_type]:
-                    for resource_name in resource.keys():
-                        error = closure(resource_type, resource_name,resource[resource_name])
-                    if error is not None: errors += error
-        if len(errors) > 0:
-            raise AssertionError("\n".join(sorted(errors)))
-
-    @deprecated
-    def assert_nested_resource_base(self, resource_types, nested_resource_name, closure):
-        errors = []
-        resources = {}
-        resource_types = self.convert_to_list(resource_types)
-        for resource_type in resource_types:
-            if resource_type not in resources.keys():
-                resources[resource_type] = []
-            if 'resource' in self.terraform_config.keys():
-                resources[resource_type] += self.get_terraform_resources(resource_type, self.terraform_config['resource'])
-
-        for resource_type in resource_types:
-            for resource in resources[resource_type]:
-                for resource_name in resource.keys():
-                    nested_resources = self.convert_to_list(self.get_terraform_resources(nested_resource_name, resource[resource_name]))
-                    #if len(nested_resources) == 0:
-                    #    errors += ["[{0}.{1}] is missing nested resource '{2}'".format(resource_type, resource_name, nested_resource_name)]
-                    for nested_resource in nested_resources:
-                        error = closure(resource_type, "{0}.{1}".format(resource_name,nested_resource_name),nested_resource)
-                        if error is not None: errors += error
-        if len(errors) > 0:
-            raise AssertionError("\n".join(sorted(errors)))
-
-    def resource_property_value_equals(self, resource_name, resource, resource_type, property, property_value):
-        calculated_property_value = self.get_terraform_property_value(property, resource)
-        if not (str(calculated_property_value) == str(property_value)):
-            return ["[{0}.{1}.{2}] should be '{3}'. Is: '{4}'".format(resource_type, resource_name, property, property_value, calculated_property_value)]
-        return []
-
-    @deprecated
-    def assert_resource_property_value_equals(self,resource_type,property,property_value):
-        def closure(resource_type, resource_name, resource):
-            return self.resource_property_value_equals(resource_name, resource, resource_type, property, property_value)
-        self.assert_resource_base(resource_type, closure)
-
-    @deprecated
-    def assert_nested_resource_property_value_equals(self, resource_type, nested_resource_name, property, property_value):
-        def closure(resource_type, resource_name, resource):
-            return self.resource_property_value_equals(resource_name, resource, resource_type, property, property_value)
-        self.assert_nested_resource_base(resource_type, nested_resource_name, closure)
-
-    def resource_property_value_not_equals(self, resource_name, resource, resource_type, property, property_value):
-        calculated_property_value = self.get_terraform_property_value(property, resource)
-        if (str(calculated_property_value) == str(property_value)):
-            return ["[{0}.{1}.{2}] should not be '{3}'. Is: '{4}'".format(resource_type, resource_name, property, property_value, calculated_property_value)]
-        return []
-
-    @deprecated
-    def assert_resource_property_value_not_equals(self, resource_type, property, property_value):
-        def closure(resource_type, resource_name, resource):
-            return self.resource_property_value_not_equals(resource_name, resource, resource_type, property, property_value)
-        self.assert_resource_base(resource_type, closure)
-
-    @deprecated
-    def assert_nested_resource_property_value_not_equals(self, resource_type, nested_resource_name, property, property_value):
-        def closure(resource_type, resource_name, resource):
-            return self.resource_property_value_not_equals(resource_name, resource, resource_type, property, property_value)
-        self.assert_nested_resource_base(resource_type, nested_resource_name, closure)
-
-    def resource_has_properties(self,resource_name,resource,resource_type,required_properties):
-        errors = []
-        property_names = resource.keys()
-        for required_property_name in required_properties:
-            if not required_property_name in property_names:
-                errors += ["[{0}.{1}] should have property: '{2}'".format(resource_type, resource_name, required_property_name)]
-        return errors
-
-    @deprecated
-    def assert_resource_has_properties(self,resource_type,required_properties):
-        def closure(resource_type, resource_name,resource):
-            return self.resource_has_properties(resource_name,resource,resource_type,required_properties)
-        self.assert_resource_base(resource_type, closure)
-
-    @deprecated
-    def assert_nested_resource_has_properties(self, resource_type, nested_resource_name, required_properties):
-        def closure(resource_type, resource_name, resource):
-            return self.resource_has_properties(resource_name, resource, resource_type, required_properties)
-        self.assert_nested_resource_base(resource_type, nested_resource_name, closure)
-
-    def resource_property_value_matches_regex(self,resource_name,resource,resource_type,property,regex):
-        calculated_property_value = self.get_terraform_property_value(property, resource)
-        if not self.matches_regex_pattern(str(calculated_property_value), regex):
-            return ["[{0}.{1}.{2}] should match regex '{3}'. Is: '{4}'".format(resource_type, resource_name, property, regex, calculated_property_value)]
-        return []
-
-    @deprecated
-    def assert_resource_property_value_matches_regex(self, resource_type, property, regex):
-        def closure(resource_type, resource_name,resource):
-            return self.resource_property_value_matches_regex(resource_name, resource, resource_type, property, regex)
-        self.assert_resource_base(resource_type, closure)
-
-    @deprecated
-    def assert_nested_resource_property_value_matches_regex(self, resource_type, nested_resource_name, property, regex):
-        def closure(resource_type, resource_name, resource):
-            return self.resource_property_value_matches_regex(resource_name, resource, resource_type, property, regex)
-        self.assert_nested_resource_base(resource_type, nested_resource_name, closure)
-
-    @deprecated
-    def assert_resource_name_matches_regex(self, resource_type, regex):
-        def closure(resource_type, resource_name, resource):
-            if not self.matches_regex_pattern(resource_name, regex):
-                return [
-                    "[{0}.{1}] should match regex '{2}'".format(resource_type, resource_name, regex )]
-            return []
-        self.assert_resource_base(resource_type, closure)
-
-    def resource_regexproperty_value_equals(self,resource_name,resource,resource_type,regex,property_value):
-        properties = self.get_terraform_properties_that_match_regex(regex, resource)
-
-        if len(properties.keys()) == 0:
-            return ["[{0}.{1}] No properties were found that match the regex '{2}'".format(resource_type, resource_name, regex)]
-
-        for property in properties.keys():
-            calculated_property_value = self.get_terraform_property_value(property, resource)
-            if not (str(calculated_property_value) == str(property_value)):
-                return ["[{0}.{1}.{2}] should be '{3}'. Is: '{4}'".format(resource_type, resource_name, property, property_value, calculated_property_value)]
-        return []
-
-    @deprecated
-    def assert_resource_regexproperty_value_equals(self, resource_type, regex, property_value):
-        def closure(resource_type, resource_name,resource):
-            return self.resource_regexproperty_value_equals(resource_name,resource,resource_type,regex,property_value)
-        self.assert_resource_base(resource_type, closure)
-
-    @deprecated
-    def assert_nested_resource_regexproperty_value_equals(self, resource_type, nested_resource_name, regex, property_value):
-        def closure(resource_type, resource_name, resource):
-            return self.resource_regexproperty_value_equals(resource_name, resource, resource_type, regex, property_value)
-        self.assert_nested_resource_base(resource_type, nested_resource_name, closure)
-
-    @deprecated
-    def assert_variable_default_value_exists(self, variable_name):
-        def closure(variable_name, default_variable_value):
-            if default_variable_value == None:
-                return ["Variable {0} should have a default value".format(variable_name)]
-            return []
-        self.assert_variable_base(variable_name, closure)
-
-    @deprecated
-    def assert_variable_default_value_equals(self, variable_name, variable_value):
-        def closure(variable_name, default_variable_value):
-            if str(default_variable_value) != str(variable_value):
-                return ["Variable {0} should have a default value of {1}. Is: {2}".format(variable_name, variable_value, default_variable_value)]
-            return []
-        self.assert_variable_base(variable_name, closure)
-
-    @deprecated
-    def assert_variable_default_value_matches_regex(self, variable_name, regex):
-        def closure(variable_name, default_variable_value):
-            if not self.matches_regex_pattern(default_variable_value, regex):
-                return [
-                    "Variable {0} should have a default value that matches regex '{1}'. Is: {2}".format(variable_name, regex, default_variable_value)]
-            return []
-        self.assert_variable_base(variable_name, closure)
-
-
