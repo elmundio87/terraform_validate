@@ -167,4 +167,12 @@ Will raise an AssertionError if the value of the property equals `unexpected_val
 ### TerraformPropertyList.should_match_regex(regex)
 
 Will raise an AssertionError if the value of the property does not match the value of `regex`
-  
+
+### TerraformPropertyList.list_should_contain([value])
+
+Will raise an AssertionError if the list value does not contain any of the `[value]`
+
+### TerraformPropertyList.list_should_not_contain([value])
+
+Will raise an AssertionError if the list value does contain any of the `[value]`
+

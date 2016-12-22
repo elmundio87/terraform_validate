@@ -133,6 +133,57 @@ class TerraformPropertyList:
         if len(errors) > 0:
             raise AssertionError("\n".join(sorted(errors)))
 
+    def list_should_contain(self,values_list):
+        errors = []
+
+        if type(values_list) is not  list:
+            values_list = [values_list]
+
+        for property in self.properties:
+
+            actual_property_value = self.validator.substitute_variable_values_in_string(property.property_value)
+            values_missing = []
+            for value in values_list:
+                if value not in actual_property_value :
+                    values_missing.append(value)
+
+            if len(values_missing) != 0:
+                if type(actual_property_value) is list:
+                    actual_property_value = [str(x) for x in actual_property_value] # fix 2.6/7
+                errors.append("[{0}.{1}.{2}] '{3}' should contain '{4}'.".format(property.resource_type,
+                                                                        property.resource_name,
+                                                                        property.property_name,
+                                                                        actual_property_value,
+                                                                        values_missing))
+        if len(errors) > 0:
+            raise AssertionError("\n".join(sorted(errors)))
+
+    def list_should_not_contain(self,values_list):
+        errors = []
+
+        if type(values_list) is not  list:
+            values_list = [values_list]
+
+        for property in self.properties:
+
+            actual_property_value = self.validator.substitute_variable_values_in_string(property.property_value)
+            values_missing = []
+            for value in values_list:
+                if value in actual_property_value :
+                    values_missing.append(value)
+
+            if len(values_missing) != 0:
+                if type(actual_property_value) is list:
+                    actual_property_value = [str(x) for x in actual_property_value] # fix 2.6/7
+                errors.append("[{0}.{1}.{2}] '{3}' should not contain '{4}'.".format(property.resource_type,
+                                                                        property.resource_name,
+                                                                        property.property_name,
+                                                                        actual_property_value,
+                                                                        values_missing))
+        if len(errors) > 0:
+            raise AssertionError("\n".join(sorted(errors)))
+
+
     def should_have_properties(self, properties_list):
         errors = []
 

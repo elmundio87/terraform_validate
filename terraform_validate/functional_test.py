@@ -315,6 +315,23 @@ class TestValidatorFunctional(unittest.TestCase):
             for value in values:
                 validator.resources("aws_db_instance").property("storage_encrypted{0}".format(i)).should_equal(value)
 
+    def test_list_should_contain(self):
+        validator = t.Validator(os.path.join(self.path, "fixtures/list_variable"))
+        validator.resources("datadog_monitor").property("tags").list_should_contain(['baz:biz'])
+        expected_error = self.error_list_format([
+            "[datadog_monitor.bar.tags] '['baz:biz', 'foo:bar']' should contain '['too:biz']'.",
+            "[datadog_monitor.foo.tags] '['baz:biz']' should contain '['too:biz']'."
+        ])
+        with self.assertRaisesRegexp(AssertionError, expected_error):
+            validator.resources("datadog_monitor").property("tags").list_should_contain('too:biz')
+
+    def test_list_should_not_contain(self):
+        validator = t.Validator(os.path.join(self.path, "fixtures/list_variable"))
+        validator.resources("datadog_monitor").property("tags").list_should_not_contain(['foo:baz'])
+        validator.resources("datadog_monitor").property("tags").list_should_not_contain('foo:baz')
+        expected_error = self.error_list_format("[datadog_monitor.bar.tags] '['baz:biz', 'foo:bar']' should not contain '['foo:bar']'.")
+        with self.assertRaisesRegexp(AssertionError, expected_error):
+            validator.resources("datadog_monitor").property("tags").list_should_not_contain('foo:bar')
 
     def test_encryption_scenario(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/enforce_encrypted"))
