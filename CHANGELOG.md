@@ -1,13 +1,23 @@
 CHANGELOG
 =========
 
+## 2.2.0 (2016/12/22)
+
+- Added functions to validate list contents - thanks [@eredi93](https://github.com/eredi93)
+
+--------------------
+
 ## 2.1.6 (2016/12/16)
 
-- Fix multiline regex - thanks @eredi93
+- Fix multiline regex - thanks [@eredi93](https://github.com/eredi93)
+
+--------------------
 
 ## 2.1.5 (2016/08/01)
 
 - Better string <-> boolean comparison in `should_equal` and `should_not_equal`
+
+--------------------
 
 ## 2.1.4 (2016/07/26)
 
