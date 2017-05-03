@@ -64,7 +64,7 @@ class TestEncryptionAtRest(unittest.TestCase):
         # Tell the module where to find your terraform configuration folder
         self.path = os.path.join(os.path.dirname(os.path.realpath(__file__)),"../terraform")
         self.v = terraform_validate.Validator(self.path)
-        
+
     def test_aws_ebs_volume(self):
         # Assert that all resources of type 'aws_instance' and 'aws_ebs_volume' have the correct tags
         tagged_resources = ["aws_instance","aws_ebs_volume"]
@@ -176,3 +176,29 @@ Will raise an AssertionError if the list value does not contain any of the `[val
 
 Will raise an AssertionError if the list value does contain any of the `[value]`
 
+
+
+## Run with Docker
+
+Build the terraform_validate daemon using:
+
+```
+docker build -t terraform_validate .
+```
+
+Then, on a different location, place your tests on your tests.py.
+
+To run:
+```
+docker run -v `pwd`:/terraform_validate terraform_validate
+```
+
+Example output (All tests passing):
+
+```
+$ docker run -v `pwd`:/terraform_validate terraform_validate
+----------------------------------------------------------------------
+Ran 3 tests in 1.607s
+
+OK
+```
