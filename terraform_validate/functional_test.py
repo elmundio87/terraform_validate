@@ -164,6 +164,12 @@ class TestValidatorFunctional(unittest.TestCase):
         with self.assertRaisesRegexp(AssertionError, expected_error):
             validator.resources('aws_instance').property('nested_resource').property('value').should_match_regex('[a-z]')
 
+    def test_resource_property_invalid_json(self):
+        validator = t.Validator(os.path.join(self.path, "fixtures/invalid_json"))
+        expected_error = self.error_list_format("[aws_s3_bucket.invalidjson.policy] is not valid json")
+        with self.assertRaisesRegexp(AssertionError, expected_error):
+            validator.resources('aws_s3_bucket').property('policy').should_contain_valid_json()
+
     def test_variable_substitution(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/variable_substitution"))
         validator.enable_variable_expansion()
@@ -173,7 +179,6 @@ class TestValidatorFunctional(unittest.TestCase):
             validator.resources('aws_instance').property('value').should_equal(2)
         validator.disable_variable_expansion()
         validator.resources('aws_instance').property('value').should_equal('${var.test_variable}')
-
 
     def test_missing_variable_substitution(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/missing_variable"))
@@ -380,3 +385,23 @@ class TestValidatorFunctional(unittest.TestCase):
         with self.assertRaisesRegexp(AssertionError,expected_error):
             validator.resources("aws_ebs_volume_invalid2").should_have_properties("encrypted")
             validator.resources("aws_ebs_volume_invalid2").property("encrypted")
+
+    def test_with_property(self):
+        validator = t.Validator(os.path.join(self.path, "fixtures/with_property"))
+        
+        expected_error = self.error_list_format("[aws_s3_bucket.private_bucket.policy] is not valid json")
+
+        private_buckets = validator.resources("aws_s3_bucket").with_property("acl", "private")
+
+        with self.assertRaisesRegexp(AssertionError, expected_error):
+            private_buckets.property("policy").should_contain_valid_json()
+
+    def test_with_nested_property(self):
+        validator = t.Validator(os.path.join(self.path, "fixtures/with_property"))
+        
+        expected_error = self.error_list_format("[aws_s3_bucket.tagged_bucket.policy] is not valid json")
+
+        tagged_buckets = validator.resources("aws_s3_bucket").with_property("tags", ".*'CustomTag':.*'CustomValue'.*")
+
+        with self.assertRaisesRegexp(AssertionError, expected_error):
+            tagged_buckets.property("policy").should_contain_valid_json()

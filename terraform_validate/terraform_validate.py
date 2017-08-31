@@ -2,6 +2,7 @@ import hcl
 import os
 import re
 import warnings
+import json
 
 # def deprecated(func):
 #     '''This is a decorator which can be used to mark functions
@@ -68,6 +69,9 @@ class TerraformPropertyList:
     def __init__(self, validator):
         self.properties = []
         self.validator = validator
+
+    def tfproperties(self):
+        return self.properties
 
     def property(self, property_name):
         errors = []
@@ -234,6 +238,18 @@ class TerraformPropertyList:
         if len(errors) > 0:
             raise AssertionError("\n".join(sorted(errors)))
 
+    def should_contain_valid_json(self):
+        errors = []
+        for property in self.properties:
+            actual_property_value = self.validator.substitute_variable_values_in_string(property.property_value)
+            try:
+                json_object = json.loads(actual_property_value)
+            except:
+                errors.append("[{0}.{1}.{2}] is not valid json".format(property.resource_type, property.resource_name, property.property_name))
+
+        if len(errors) > 0:
+            raise AssertionError("\n".join(sorted(errors)))
+
     def bool2str(self,bool):
         if str(bool).lower() in ["true"]:
             return "True"
@@ -254,6 +270,8 @@ class TerraformProperty:
         self.property_name = property_name
         self.property_value = property_value
 
+    def get_property_value(self, validator):
+        return validator.substitute_variable_values_in_string(self.property_value)
 
 class TerraformResource:
 
@@ -266,7 +284,7 @@ class TerraformResourceList:
 
     def __init__(self, validator, resource_types, resources):
         self.resource_list = []
-
+        
         if type(resource_types) is not list:
             all_resource_types = list(resources.keys())
             regex = resource_types
@@ -280,6 +298,7 @@ class TerraformResourceList:
                 for resource in resources[resource_type]:
                     self.resource_list.append(TerraformResource(resource_type,resource,resources[resource_type][resource]))
 
+        self.resource_types = resource_types
         self.validator = validator
 
     def property(self, property_name):
@@ -307,6 +326,20 @@ class TerraformResourceList:
                                                              resource.name,
                                                              property,
                                                              resource.config[property]))
+        return list
+
+    def with_property(self, property_name, regex):
+        list = TerraformResourceList(self.validator, self.resource_types, {})
+        
+        if len(self.resource_list) > 0:
+            for resource in self.resource_list:
+                for property in resource.config:
+                    if(property == property_name):
+                        tf_property = TerraformProperty(resource.type,resource.name,property_name,resource.config[property_name])
+                        actual_property_value = self.validator.substitute_variable_values_in_string(tf_property.property_value)
+                        if self.validator.matches_regex_pattern(actual_property_value, regex):
+                            list.resource_list.append(resource)
+        
         return list
 
     def should_have_properties(self, properties_list):
