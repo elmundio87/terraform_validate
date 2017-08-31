@@ -1,6 +1,12 @@
 CHANGELOG
 =========
 
+## 2.4.0 (2017/08/31)
+
+- Adding ability to filter resources by property value - thanks [@No-Signal](https://github.com/No-Signal)
+
+--------------------
+
 ## 2.3.1 (2016/12/22)
 
 - Messed up the 2.3.0 release so re-releasing
