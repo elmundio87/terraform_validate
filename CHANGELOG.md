@@ -1,6 +1,14 @@
 CHANGELOG
 =========
 
+
+## 2.5.0 (2017/08/31)
+
+- Updated to latest version of PyHCL - thanks [@proffalken](https://github.com/proffalken)
+
+--------------------
+
+
 ## 2.4.0 (2017/08/31)
 
 - Adding ability to filter resources by property value - thanks [@No-Signal](https://github.com/No-Signal)
