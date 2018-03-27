@@ -339,6 +339,13 @@ class TestValidatorFunctional(unittest.TestCase):
         with self.assertRaisesRegexp(AssertionError, expected_error):
             validator.resources("datadog_monitor").property("tags").list_should_not_contain('foo:bar')
 
+    def test_property_list_scenario(self):
+        validator = t.Validator(os.path.join(self.path, "fixtures/list_property"))
+        validator.error_if_property_missing()
+
+        validator.resources("aws_autoscaling_group").property("tag").property('propagate_at_launch').should_equal("True")
+        validator.resources("aws_autoscaling_group").property("tag").property('propagate_at_launch').should_equal(True)
+
     def test_encryption_scenario(self):
         validator = t.Validator(os.path.join(self.path, "fixtures/enforce_encrypted"))
         validator.error_if_property_missing()

@@ -75,20 +75,27 @@ class TerraformPropertyList:
 
     def property(self, property_name):
         errors = []
-        list = TerraformPropertyList(self.validator)
+        result = TerraformPropertyList(self.validator)
         for property in self.properties:
-            if property_name in property.property_value.keys():
-                list.properties.append(TerraformProperty(property.resource_type,
-                                                     "{0}.{1}".format(property.resource_name,property.property_name),
-                                                     property_name,
-                                                     property.property_value[property_name]))
-            elif self.validator.raise_error_if_property_missing:
-                errors.append("[{0}.{1}] should have property: '{2}'".format(property.resource_type, "{0}.{1}".format(property.resource_name,property.property_name), property_name))
+            def _check_prop(prop_value):
+                if property_name in prop_value.keys():
+                    result.properties.append(TerraformProperty(property.resource_type,
+                                                         "{0}.{1}".format(property.resource_name,property.property_name),
+                                                         property_name,
+                                                         prop_value[property_name]))
+                elif self.validator.raise_error_if_property_missing:
+                    errors.append("[{0}.{1}] should have property: '{2}'".format(property.resource_type, "{0}.{1}".format(property.resource_name,property.property_name), property_name))
+
+            if isinstance(property.property_value, list):
+                for prop in property.property_value:
+                    _check_prop(prop)
+            else:
+                _check_prop(property.property_value)
 
         if len(errors) > 0:
             raise AssertionError("\n".join(sorted(errors)))
 
-        return list
+        return result
 
     def should_equal(self,expected_value):
         errors = []
