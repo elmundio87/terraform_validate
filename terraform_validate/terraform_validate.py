@@ -1,8 +1,12 @@
+import time
 import hcl
 import os
 import re
+import sys
+import shutil
 import warnings
 import json
+import git
 
 # def deprecated(func):
 #     '''This is a decorator which can be used to mark functions
@@ -459,18 +463,100 @@ class Validator:
     def error_if_property_missing(self):
         self.raise_error_if_property_missing = True
 
+    def read_terraform_file(self,fullpath):
+        with open(fullpath) as fp:
+            new_terraform = fp.read()
+        return new_terraform
+
+    def get_git_module(self, source_string):
+        ### In here we clone the git module.
+        ### Best to do it to a temp path.
+        ### Create temp path using the name of the repo and ref.
+        ### Then pass back the temp path as a string
+        ### This, along with the validator gets run each time
+        ### a test is run.  Might not seem efficient,
+        ### but if not done this way, it could cause issues
+        ### with incorrect or outdated data being kept around.
+        ### In the future, I would like to turn some of these parts
+        ### into functions to make them reusable for other repo types.
+
+        if source_string.startswith("git::"): ## pull apart the source string to make it a directory name
+            source_string = source_string[5:]
+        if "?" in source_string: ## if theres a ?ref=<branch or commit>, use that for the dir name.
+            source, refs = source_string.split("?")
+        else:
+            source = source_string
+        repo_temp_dir = source.split("/")[-1]
+        if os.name == 'nt':  ## This is the one place where my code is different for windows.
+            directory = "c:\\temp\\terraform_validate\\" + repo_temp_dir
+        else:
+            directory = '/tmp/terraform_validate/'+repo_temp_dir
+        if 'refs' in locals():
+            refs = refs.split('=')[-1]
+            if "//" in refs:
+                refs = refs.split('//')[0]
+            directory = directory+'-'+refs
+        try:
+            os.stat(directory)
+            shutil.rmtree(directory, ignore_errors=True) ## clean slate, unless a unique directory.
+        except:
+            pass
+        os.makedirs(directory)
+        repo = git.Git(directory)
+        repo.clone(source, directory) ## by default, this checks out master.
+        if 'refs' in locals():
+            repo.checkout(refs) ## if a ref was specified, check it out.
+        return directory
+
+    def check_terraform_for_modules(self,new_terraform):
+
+        ## terraform itself uses a git getter which essentially just uses the system's git
+        ## in order to perform the get of repo and any submodules.
+        ## since this is the method used, I am assuming that a similar method is acceptable here.
+        ## we have gitpython; which makes similar assumptions to terraform.
+
+        modules_to_process = []
+        terra_dictionary = hcl.loads(new_terraform)
+        if ("module" in terra_dictionary):
+            for module in terra_dictionary['module'].values():
+                if (isinstance(module, dict)):
+                    for key, value in module.items():
+                        if ("source" in key):
+                            if ((value.startswith(".")) or (value.startswith("/"))):
+                                modules_to_process.append(value)
+                            if '.git' or '::git' in (value):
+                                modules_to_process.append(self.get_git_module(value))
+        return modules_to_process
+         
+
     def parse_terraform_directory(self,path):
+        ## It looks like we are repeating ourselves.  This is done to first process the initial directory
+        ## and then gain the details for the modules.  Future modification may DRY this by separating
+        ## it into different functions.  Alas, I have no more time to work on this.
 
         terraform_string = ""
         for directory, subdirectories, files in os.walk(path):
             for file in files:
                 if (file.endswith(".tf")):
-                    with open(os.path.join(directory, file)) as fp:
-                        new_terraform = fp.read()
-                        try:
-                            hcl.loads(new_terraform)
-                        except ValueError as e:
-                            raise TerraformSyntaxException("Invalid terraform configuration in {0}\n{1}".format(os.path.join(directory,file),e))
+                    new_terraform = self.read_terraform_file(directory+"/"+file)
+                    try:
+                        hcl.loads(new_terraform)
+                    except ValueError as e:
+                        raise TerraformSyntaxException("Invalid terraform configuration in {0}\n{1}".format(os.path.join(directory,file),e))
+                    modules_to_process = self.check_terraform_for_modules(new_terraform)
+                    terraform_string += new_terraform
+                    if (modules_to_process is not None):
+                        for module_directory in modules_to_process:
+                            for mod_directory, mod_subdirectories, mod_files in os.walk(module_directory):
+                                for mod_file in mod_files:
+                                    if (mod_file.endswith(".tf")):
+                                        module_terraform = self.read_terraform_file(mod_directory+"/"+mod_file)
+                                        try:
+                                            hcl.loads(module_terraform)
+                                        except ValueError as e:
+                                             
+                                            raise TerraformSyntaxException("Invalid terraform configuration in {0}\n{1}".format(os.path.join(mod_directory,mod_file),e))
+                                   
                         terraform_string += new_terraform
         terraform = hcl.loads(terraform_string)
         return terraform
