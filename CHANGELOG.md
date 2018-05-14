@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+## 2.7.0 (2018/05/14)
+
+- Support for git modules - thanks [@melbit-jonathanb](https://github.com/melbit-jonathanb)
+
+
 ## 2.6.0 (2018/03/25)
 
 - Property value can be list - thanks [@atward](https://github.com/atward)
