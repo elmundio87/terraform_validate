@@ -11,6 +11,7 @@ setup(
     keywords = ['terraform', 'assert', 'testing'],
     packages = find_packages(),
     install_requires=[
-        "pyhcl"
+        "pyhcl",
+        "gitpython"
     ],
 )
