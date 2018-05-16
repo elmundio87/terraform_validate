@@ -202,11 +202,3 @@ Ran 3 tests in 1.607s
 
 OK
 ```
-
-## Git based source modules
-
-* Support added for git based modules using [GitPython](http://gitpython.readthedocs.io/en/stable/index.html)
-* Uses locally installed git, similar to terraform. 
-* Support for ?ref= and creation of separate directories for different refs
-* Stores the modules in /tmp/terraform_validate or c:\temp\terraform_validate
-* Will remove existing modules in the /tmp or c:\temp directory to keep things fresh.
