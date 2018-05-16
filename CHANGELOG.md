@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+## 2.8.0 (2018/05/16)
+
+- Reverted [PR #28](https://github.com/elmundio87/terraform_validate/pull/28) while we work on ironing out edge cases
+
 ## 2.7.1 (2018/05/15)
 
 - Fixed missing gitpython dependency in setup.py

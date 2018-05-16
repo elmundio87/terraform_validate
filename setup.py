@@ -2,12 +2,12 @@ from setuptools import setup, find_packages
 
 setup(
     name="terraform_validate",
-    version="2.7.1",
+    version="2.8.0",
     author="Edmund Dipple",
     author_email="elmundio1987@gmail.com",
     description="A library that provides asserts for testing Terraform configuration",
     url="https://github.com/elmundio87/terraform_validate",
-    download_url = 'https://github.com/elmundio87/terraform_validate/tarball/2.7.1',
+    download_url = 'https://github.com/elmundio87/terraform_validate/tarball/2.8.0',
     keywords = ['terraform', 'assert', 'testing'],
     packages = find_packages(),
     install_requires=[
