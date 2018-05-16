@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+## 2.7.1 (2018/05/15)
+
+- Fixed missing gitpython dependency in setup.py
+
 ## 2.7.0 (2018/05/14)
 
 - Support for git modules - thanks [@melbit-jonathanb](https://github.com/melbit-jonathanb)
