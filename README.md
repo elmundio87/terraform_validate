@@ -4,9 +4,9 @@ Linux: [![Linux Build Status](https://travis-ci.org/elmundio87/terraform_validat
 
 Windows: [![Windows Build status](https://ci.appveyor.com/api/projects/status/36dwtekc8tvrny24/branch/master?svg=true)](https://ci.appveyor.com/project/elmundio87/terraform-validate/branch/master)
 
-A python package that assists in the enforcement of user-defined standards in Terraform.
+A python package that to define Policy as Code for Terraform configurations. 
 
-The validator uses `pyhcl` to parse Terraform configuration files, then tests the state of the config using custom Assert functions.
+It works by parsing a directory of .tf files, then running tests on the configuration using custom Assert functions.
 
 ## Example Usages
 
