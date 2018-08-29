@@ -25,7 +25,7 @@ class TestEncryptionAtRest(unittest.TestCase):
 
     def test_aws_ebs_volume(self):
         # Assert that all resources of type 'aws_ebs_volume' are encrypted
-        self.v.error_if_property_missing() #Fail any tests if the property does not exist
+        self.v.error_if_property_missing() # Fail any tests if the property does not exist on a resource
         self.v.resources('aws_ebs_volume').property('encrypted').should_equal(True)
 
     def test_instance_ebs_block_device(self):
